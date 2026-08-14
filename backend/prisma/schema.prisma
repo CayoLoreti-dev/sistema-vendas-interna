@@ -1,13 +1,68 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Papel {
+  ADMIN
+  FUNCIONARIO
+}
+
+enum StatusPedido {
+  FIADO
+  PAGO
+}
+
+model Usuario {
+  id       String   @id @default(uuid())
+  nome     String
+  telefone String   @unique
+  senha    String   // hash do PIN
+  papel    Papel    @default(FUNCIONARIO)
+  criadoEm DateTime @default(now())
+  pedidos  Pedido[]
+
+  @@map("usuarios")
+}
+
+model Produto {
+  id           String   @id @default(uuid())
+  nome         String
+  categoria    String?
+  preco        Decimal  @db.Decimal(10, 2)
+  estoqueAtual Int      @default(0)
+  criadoEm     DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
+  itensPedido  ItemPedido[]
+
+  @@map("produtos")
+}
+
+model Pedido {
+  id         String       @id @default(uuid())
+  usuario    Usuario      @relation(fields: [usuarioId], references: [id])
+  usuarioId  String
+  status     StatusPedido @default(FIADO)
+  valorTotal Decimal      @db.Decimal(10, 2)
+  criadoEm   DateTime     @default(now())
+  pagoEm     DateTime?
+  itens      ItemPedido[]
+
+  @@map("pedidos")
+}
+
+model ItemPedido {
+  id            String  @id @default(uuid())
+  pedido        Pedido  @relation(fields: [pedidoId], references: [id])
+  pedidoId      String
+  produto       Produto @relation(fields: [produtoId], references: [id])
+  produtoId     String
+  quantidade    Int
+  precoUnitario Decimal @db.Decimal(10, 2) // snapshot do preço no momento da compra
+
+  @@map("itens_pedido")
 }
