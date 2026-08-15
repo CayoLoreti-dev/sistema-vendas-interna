@@ -1,11 +1,11 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import AdminLayout from './layouts/AdminLayout'
-import AdminDashboard from './pages/AdminDashboard'
-import AdminPedidosPlaceholder from './pages/AdminPedidosPlaceholder'
+import DashboardPage from './pages/DashboardPage'
 import FuncionarioHome from './pages/FuncionarioHome'
 import FuncionariosPage from './pages/FuncionariosPage'
 import Login from './pages/Login'
+import PedidosPage from './pages/PedidosPage'
 import ProdutosPage from './pages/ProdutosPage'
 import './App.css'
 
@@ -49,10 +49,10 @@ function App() {
               </ProtectedRoute>
             )}
           >
-            <Route index element={<AdminDashboard />} />
+            <Route index element={<DashboardPage />} />
             <Route path="produtos" element={<ProdutosPage />} />
             <Route path="funcionarios" element={<FuncionariosPage />} />
-            <Route path="pedidos" element={<AdminPedidosPlaceholder />} />
+            <Route path="pedidos" element={<PedidosPage />} />
           </Route>
           <Route
             path="/funcionario"
