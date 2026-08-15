@@ -23,13 +23,14 @@ enum MetodoPagamento {
 }
 
 model Usuario {
-  id       String   @id @default(uuid())
-  nome     String
-  telefone String   @unique
-  senha    String   // hash do PIN
-  papel    Papel    @default(FUNCIONARIO)
-  criadoEm DateTime @default(now())
-  pedidos  Pedido[]
+  id                String             @id @default(uuid())
+  nome              String
+  telefone          String             @unique
+  senha             String             // hash do PIN
+  papel             Papel              @default(FUNCIONARIO)
+  criadoEm          DateTime           @default(now())
+  pedidos           Pedido[]
+  pushSubscriptions PushSubscription[]
 
   @@map("usuarios")
 }
@@ -71,4 +72,16 @@ model ItemPedido {
   precoUnitario Decimal @db.Decimal(10, 2) // snapshot do preço no momento da compra
 
   @@map("itens_pedido")
+}
+
+model PushSubscription {
+  id        String   @id @default(uuid())
+  usuario   Usuario  @relation(fields: [usuarioId], references: [id])
+  usuarioId String
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  criadoEm  DateTime @default(now())
+
+  @@map("push_subscriptions")
 }

@@ -1,4 +1,5 @@
 const { Prisma } = require('@prisma/client')
+const { enviarNotificacaoAdmins } = require('../lib/push')
 const prisma = require('../lib/prisma')
 
 class PedidoError extends Error {
@@ -53,6 +54,17 @@ function validarMetodoPagamento(metodoPagamento) {
   }
 
   return metodoPagamento
+}
+
+function formatarMoeda(valor) {
+  return new Intl.NumberFormat('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+  }).format(Number(valor))
+}
+
+function metodoPagamentoLabel(metodoPagamento) {
+  return metodoPagamento === 'PIX' ? 'Aguardando Pix' : 'Fiado'
 }
 
 async function criarPedido(req, res) {
@@ -132,6 +144,13 @@ async function criarPedido(req, res) {
         where: { id: pedidoCriado.id },
         include: pedidoInclude(),
       })
+    })
+
+    enviarNotificacaoAdmins({
+      title: 'Novo pedido!',
+      body: `${pedido.usuario.nome} comprou por ${formatarMoeda(pedido.valorTotal)} - ${metodoPagamentoLabel(pedido.metodoPagamento)}`,
+    }).catch((error) => {
+      console.error('Erro ao disparar notificacao de novo pedido', error)
     })
 
     return res.status(201).json(pedido)

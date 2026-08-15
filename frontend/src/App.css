@@ -364,10 +364,15 @@ button:disabled {
 }
 
 .actions,
-.row-actions {
+.row-actions,
+.admin-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
+}
+
+.admin-actions {
+  justify-content: flex-end;
 }
 
 .secondary-button {
@@ -590,9 +595,14 @@ th {
 
   .admin-nav a,
   .admin-topbar button,
+  .admin-actions,
   .funcionario-nav a,
   .funcionario-topbar button {
     text-align: center;
+  }
+
+  .admin-actions {
+    justify-content: stretch;
   }
 
   .funcionario-topbar {
