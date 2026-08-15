@@ -14,7 +14,7 @@ function FuncionarioLayout() {
     <div className="funcionario-shell">
       <header className="funcionario-topbar">
         <div>
-          <p className="eyebrow">Vendas Interna</p>
+          <p className="eyebrow brand-name">Vendas Interna</p>
           <strong>{usuario?.nome}</strong>
         </div>
 

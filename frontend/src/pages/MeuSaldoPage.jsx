@@ -57,7 +57,7 @@ function MeuSaldoPage() {
         <>
           <section className="balance-card">
             <span>Total em aberto</span>
-            <strong>{moeda.format(Number(saldo.total))}</strong>
+            <strong className="valor-mono">{moeda.format(Number(saldo.total))}</strong>
           </section>
 
           {saldo.pedidos.length === 0 ? (
@@ -72,7 +72,9 @@ function MeuSaldoPage() {
                   <div className="order-header">
                     <div>
                       <strong>{formatarData(pedido.criadoEm)}</strong>
-                      <span>{metodoLabel(pedido.metodoPagamento)}</span>
+                      <span className={`method-badge ${pedido.metodoPagamento === 'PIX' ? 'pix' : 'fiado'}`}>
+                        {metodoLabel(pedido.metodoPagamento)}
+                      </span>
                     </div>
 
                     <span className="status-badge open">Em aberto</span>
@@ -82,13 +84,13 @@ function MeuSaldoPage() {
                     {pedido.itens.map((item) => (
                       <li key={item.id}>
                         <span>{item.produto.nome}</span>
-                        <strong>{item.quantidade} un.</strong>
+                        <strong className="valor-mono">{item.quantidade} un.</strong>
                       </li>
                     ))}
                   </ul>
 
                   <div className="order-footer">
-                    <strong>{moeda.format(Number(pedido.valorTotal))}</strong>
+                    <strong className="valor-mono">{moeda.format(Number(pedido.valorTotal))}</strong>
                   </div>
                 </article>
               ))}

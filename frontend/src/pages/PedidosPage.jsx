@@ -124,13 +124,13 @@ function PedidosPage() {
                 {pedido.itens.map((item) => (
                   <li key={item.id}>
                     <span>{item.produto.nome}</span>
-                    <strong>{item.quantidade} un.</strong>
+                    <strong className="valor-mono">{item.quantidade} un.</strong>
                   </li>
                 ))}
               </ul>
 
               <div className="order-footer">
-                <strong>{moeda.format(Number(pedido.valorTotal))}</strong>
+                <strong className="valor-mono">{moeda.format(Number(pedido.valorTotal))}</strong>
                 {pedido.status === 'FIADO' && (
                   <button
                     disabled={pagandoId === pedido.id}

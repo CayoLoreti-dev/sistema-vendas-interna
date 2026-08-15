@@ -145,6 +145,7 @@ function ProdutosPage() {
           <label>
             Preco
             <input
+              className="valor-mono"
               min="0"
               onChange={(event) => atualizarCampo('preco', event.target.value)}
               required
@@ -157,6 +158,7 @@ function ProdutosPage() {
           <label>
             Estoque inicial
             <input
+              className="valor-mono"
               min="0"
               onChange={(event) => atualizarCampo('estoqueAtual', event.target.value)}
               required
@@ -203,8 +205,8 @@ function ProdutosPage() {
                 <tr key={produto.id}>
                   <td>{produto.nome}</td>
                   <td>{produto.categoria || '-'}</td>
-                  <td>{moeda.format(Number(produto.preco))}</td>
-                  <td>{produto.estoqueAtual}</td>
+                  <td className="valor-mono">{moeda.format(Number(produto.preco))}</td>
+                  <td className="valor-mono">{produto.estoqueAtual}</td>
                   <td>
                     <div className="row-actions">
                       <button type="button" onClick={() => editarProduto(produto)}>Editar</button>

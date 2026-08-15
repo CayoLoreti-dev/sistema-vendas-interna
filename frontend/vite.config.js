@@ -11,11 +11,15 @@ export default defineConfig({
       srcDir: 'src',
       filename: 'sw.js',
       registerType: 'autoUpdate',
+      devOptions: {
+        enabled: true,
+        type: 'module',
+      },
       manifest: {
         name: 'Vendas Interna',
         short_name: 'Vendas',
-        theme_color: '#2F5D8A',
-        background_color: '#FFFFFF',
+        theme_color: '#1C1815',
+        background_color: '#1C1815',
         display: 'standalone',
         icons: [
           {

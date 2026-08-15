@@ -147,7 +147,7 @@ function FuncionariosPage() {
               {funcionarios.map((funcionario) => (
                 <tr key={funcionario.id}>
                   <td>{funcionario.nome}</td>
-                  <td>{funcionario.telefone}</td>
+                  <td className="valor-mono">{funcionario.telefone}</td>
                   <td>{funcionario.papel}</td>
                   <td>{new Date(funcionario.criadoEm).toLocaleDateString('pt-BR')}</td>
                 </tr>

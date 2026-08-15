@@ -73,19 +73,19 @@ function DashboardPage() {
           <div className="summary-grid">
             <section className={`summary-card ${produtosBaixoEstoque.length > 0 ? 'attention' : ''}`}>
               <span>Estoque baixo</span>
-              <strong>{produtosBaixoEstoque.length}</strong>
-              <p>Produtos com menos de {LIMITE_ESTOQUE_BAIXO} unidades.</p>
+              <strong className="valor-mono">{produtosBaixoEstoque.length}</strong>
+              <p>Produtos com menos de <span className="valor-mono">{LIMITE_ESTOQUE_BAIXO}</span> unidades.</p>
             </section>
 
             <section className="summary-card">
               <span>Total em aberto</span>
-              <strong>{moeda.format(totalEmAberto)}</strong>
+              <strong className="valor-mono">{moeda.format(totalEmAberto)}</strong>
               <p>Valor fiado ainda nao pago.</p>
             </section>
 
             <section className="summary-card">
               <span>Pedidos em aberto</span>
-              <strong>{quantidadeEmAberto}</strong>
+              <strong className="valor-mono">{quantidadeEmAberto}</strong>
               <p>Pedidos aguardando pagamento.</p>
             </section>
           </div>
@@ -97,7 +97,7 @@ function DashboardPage() {
                 {produtosBaixoEstoque.map((produto) => (
                   <li key={produto.id}>
                     <span>{produto.nome}</span>
-                    <strong>{produto.estoqueAtual} un.</strong>
+                    <strong className="valor-mono">{produto.estoqueAtual} un.</strong>
                   </li>
                 ))}
               </ul>
@@ -118,7 +118,7 @@ function DashboardPage() {
                   <li key={pedido.id}>
                     <Link to="/admin/pedidos">
                       <span>{pedido.usuario.nome}</span>
-                      <strong>{moeda.format(Number(pedido.valorTotal))}</strong>
+                      <strong className="valor-mono">{moeda.format(Number(pedido.valorTotal))}</strong>
                       <em>{statusLabel(pedido.status)}</em>
                     </Link>
                   </li>

@@ -151,8 +151,8 @@ function CatalogoPage() {
                 <div>
                   <span>{produto.categoria || 'Produto'}</span>
                   <h2>{produto.nome}</h2>
-                  <strong>{moeda.format(Number(produto.preco))}</strong>
-                  <p>{semEstoque ? 'Sem estoque no momento' : `${produto.estoqueAtual} disponivel`}</p>
+                  <strong className="valor-mono">{moeda.format(Number(produto.preco))}</strong>
+                  <p>{semEstoque ? 'Sem estoque no momento' : <><span className="valor-mono">{produto.estoqueAtual}</span> disponivel</>}</p>
                 </div>
 
                 {!semEstoque && (
@@ -163,6 +163,7 @@ function CatalogoPage() {
                         max={produto.estoqueAtual}
                         min="1"
                         onChange={(event) => atualizarQuantidade(produto, event.target.value)}
+                        className="valor-mono"
                         type="number"
                         value={quantidadeSelecionada(produto)}
                       />
@@ -183,7 +184,7 @@ function CatalogoPage() {
         <aside className="cart-panel" aria-label="Carrinho">
           <div className="cart-header">
             <strong>Carrinho</strong>
-            <span>{moeda.format(totalCarrinho)}</span>
+            <span className="valor-mono">{moeda.format(totalCarrinho)}</span>
           </div>
 
           <ul>
@@ -192,6 +193,7 @@ function CatalogoPage() {
                 <span>{item.produto.nome}</span>
                 <input
                   aria-label={`Quantidade de ${item.produto.nome}`}
+                  className="valor-mono"
                   max={item.produto.estoqueAtual}
                   min="1"
                   onChange={(event) => atualizarItemCarrinho(item.produto.id, event.target.value)}
@@ -233,15 +235,15 @@ function CatalogoPage() {
             <ul className="checkout-list">
               {carrinho.map((item) => (
                 <li key={item.produto.id}>
-                  <span>{item.produto.nome} x {item.quantidade}</span>
-                  <strong>{moeda.format(Number(item.produto.preco) * item.quantidade)}</strong>
+                  <span>{item.produto.nome} x <span className="valor-mono">{item.quantidade}</span></span>
+                  <strong className="valor-mono">{moeda.format(Number(item.produto.preco) * item.quantidade)}</strong>
                 </li>
               ))}
             </ul>
 
             <div className="checkout-total">
               <span>Total</span>
-              <strong>{moeda.format(totalCarrinho)}</strong>
+              <strong className="valor-mono">{moeda.format(totalCarrinho)}</strong>
             </div>
 
             <div className="payment-options">

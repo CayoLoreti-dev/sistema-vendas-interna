@@ -31,7 +31,7 @@ function Login() {
     <main className="auth-page">
       <form className="auth-card" onSubmit={handleSubmit}>
         <div>
-          <p className="eyebrow">Vendas Interna</p>
+          <p className="eyebrow brand-name">Vendas Interna</p>
           <h1>Entrar</h1>
         </div>
 

@@ -20,22 +20,32 @@ function AdminLayout() {
   const navigate = useNavigate()
   const { usuario, logout } = useAuth()
   const [subscriptionAtiva, setSubscriptionAtiva] = useState(false)
+  const [verificandoNotificacao, setVerificandoNotificacao] = useState(true)
   const [notificacaoMensagem, setNotificacaoMensagem] = useState('')
   const [ativandoNotificacao, setAtivandoNotificacao] = useState(false)
 
   useEffect(() => {
     async function conferirSubscription() {
       if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+        setVerificandoNotificacao(false)
         return
       }
 
       const registration = await navigator.serviceWorker.ready
       const subscription = await registration.pushManager.getSubscription()
-      setSubscriptionAtiva(Boolean(subscription))
+      const ativa = Notification.permission === 'granted' && Boolean(subscription)
+
+      setSubscriptionAtiva(ativa)
+
+      if (ativa) {
+        await api.post('/push/subscribe', subscription.toJSON())
+      }
     }
 
     conferirSubscription().catch(() => {
       setSubscriptionAtiva(false)
+    }).finally(() => {
+      setVerificandoNotificacao(false)
     })
   }, [])
 
@@ -66,8 +76,9 @@ function AdminLayout() {
       const subscriptionExistente = await registration.pushManager.getSubscription()
 
       if (subscriptionExistente) {
+        await api.post('/push/subscribe', subscriptionExistente.toJSON())
         setSubscriptionAtiva(true)
-        setNotificacaoMensagem('Notificacoes ja estavam ativadas neste aparelho.')
+        setNotificacaoMensagem('Notificacoes ativadas neste aparelho.')
         return
       }
 
@@ -91,7 +102,7 @@ function AdminLayout() {
     <div className="admin-shell">
       <header className="admin-topbar">
         <div>
-          <p className="eyebrow">Vendas Interna</p>
+          <p className="eyebrow brand-name">Vendas Interna</p>
           <strong>{usuario?.nome}</strong>
         </div>
 
@@ -103,7 +114,7 @@ function AdminLayout() {
         </nav>
 
         <div className="admin-actions">
-          {!subscriptionAtiva && (
+          {!verificandoNotificacao && !subscriptionAtiva && (
             <button
               className="secondary-button"
               disabled={ativandoNotificacao}
