@@ -1,0 +1,163 @@
+import { useEffect, useState } from 'react'
+import { api } from '../services/api'
+
+const funcionarioInicial = {
+  nome: '',
+  telefone: '',
+  pin: '',
+}
+
+function FuncionariosPage() {
+  const [funcionarios, setFuncionarios] = useState([])
+  const [form, setForm] = useState(funcionarioInicial)
+  const [carregando, setCarregando] = useState(true)
+  const [salvando, setSalvando] = useState(false)
+  const [erro, setErro] = useState('')
+  const [mensagem, setMensagem] = useState('')
+
+  async function carregarFuncionarios() {
+    setErro('')
+    setCarregando(true)
+
+    try {
+      const dados = await api.get('/usuarios')
+      setFuncionarios(dados)
+    } catch {
+      setErro('Nao foi possivel carregar os funcionarios.')
+    } finally {
+      setCarregando(false)
+    }
+  }
+
+  useEffect(() => {
+    carregarFuncionarios()
+  }, [])
+
+  function atualizarCampo(campo, valor) {
+    setForm((atual) => ({
+      ...atual,
+      [campo]: valor,
+    }))
+  }
+
+  async function cadastrarFuncionario(event) {
+    event.preventDefault()
+    setErro('')
+    setMensagem('')
+
+    if (!/^\d{4,6}$/.test(form.pin)) {
+      setErro('O PIN deve ter entre 4 e 6 numeros.')
+      return
+    }
+
+    setSalvando(true)
+
+    try {
+      await api.post('/usuarios', {
+        nome: form.nome,
+        telefone: form.telefone,
+        pin: form.pin,
+        papel: 'FUNCIONARIO',
+      })
+
+      setForm(funcionarioInicial)
+      setMensagem('Funcionario cadastrado com sucesso.')
+      await carregarFuncionarios()
+    } catch (error) {
+      if (error.message === 'Telefone ja cadastrado') {
+        setErro('Esse telefone ja esta cadastrado.')
+      } else {
+        setErro('Nao foi possivel cadastrar o funcionario.')
+      }
+    } finally {
+      setSalvando(false)
+    }
+  }
+
+  return (
+    <section className="page-stack">
+      <div className="page-heading">
+        <p className="eyebrow">Funcionarios</p>
+        <h1>Funcionarios</h1>
+      </div>
+
+      <form className="form-panel" onSubmit={cadastrarFuncionario}>
+        <h2>Novo funcionario</h2>
+
+        <div className="form-grid">
+          <label>
+            Nome
+            <input
+              onChange={(event) => atualizarCampo('nome', event.target.value)}
+              required
+              type="text"
+              value={form.nome}
+            />
+          </label>
+
+          <label>
+            Telefone
+            <input
+              inputMode="tel"
+              onChange={(event) => atualizarCampo('telefone', event.target.value)}
+              required
+              type="tel"
+              value={form.telefone}
+            />
+          </label>
+
+          <label>
+            PIN
+            <input
+              inputMode="numeric"
+              maxLength={6}
+              onChange={(event) => atualizarCampo('pin', event.target.value)}
+              pattern="[0-9]*"
+              required
+              type="password"
+              value={form.pin}
+            />
+          </label>
+        </div>
+
+        <button disabled={salvando} type="submit">
+          {salvando ? 'Salvando...' : 'Cadastrar funcionario'}
+        </button>
+      </form>
+
+      {erro && <p className="error">{erro}</p>}
+      {mensagem && <p className="success">{mensagem}</p>}
+
+      <div className="table-panel">
+        {carregando ? (
+          <p>Carregando funcionarios...</p>
+        ) : funcionarios.length === 0 ? (
+          <p>Nenhum funcionario cadastrado.</p>
+        ) : (
+          <table>
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>Telefone</th>
+                <th>Papel</th>
+                <th>Criado em</th>
+              </tr>
+            </thead>
+            <tbody>
+              {funcionarios.map((funcionario) => (
+                <tr key={funcionario.id}>
+                  <td>{funcionario.nome}</td>
+                  <td>{funcionario.telefone}</td>
+                  <td>{funcionario.papel}</td>
+                  <td>{new Date(funcionario.criadoEm).toLocaleDateString('pt-BR')}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+    </section>
+  )
+}
+
+export default FuncionariosPage

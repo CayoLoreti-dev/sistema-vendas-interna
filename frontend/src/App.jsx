@@ -1,8 +1,12 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
-import AdminHome from './pages/AdminHome'
+import AdminLayout from './layouts/AdminLayout'
+import AdminDashboard from './pages/AdminDashboard'
+import AdminPedidosPlaceholder from './pages/AdminPedidosPlaceholder'
 import FuncionarioHome from './pages/FuncionarioHome'
+import FuncionariosPage from './pages/FuncionariosPage'
 import Login from './pages/Login'
+import ProdutosPage from './pages/ProdutosPage'
 import './App.css'
 
 function HomeRedirect() {
@@ -41,10 +45,15 @@ function App() {
             path="/admin"
             element={(
               <ProtectedRoute papel="ADMIN">
-                <AdminHome />
+                <AdminLayout />
               </ProtectedRoute>
             )}
-          />
+          >
+            <Route index element={<AdminDashboard />} />
+            <Route path="produtos" element={<ProdutosPage />} />
+            <Route path="funcionarios" element={<FuncionariosPage />} />
+            <Route path="pedidos" element={<AdminPedidosPlaceholder />} />
+          </Route>
           <Route
             path="/funcionario"
             element={(

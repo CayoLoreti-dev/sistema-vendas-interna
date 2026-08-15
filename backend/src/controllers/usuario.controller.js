@@ -39,6 +39,24 @@ async function criarUsuario(req, res) {
   }
 }
 
+async function listarUsuarios(req, res) {
+  const usuarios = await prisma.usuario.findMany({
+    select: {
+      id: true,
+      nome: true,
+      telefone: true,
+      papel: true,
+      criadoEm: true,
+    },
+    orderBy: {
+      nome: 'asc',
+    },
+  })
+
+  return res.json(usuarios)
+}
+
 module.exports = {
   criarUsuario,
+  listarUsuarios,
 }
