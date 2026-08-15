@@ -47,9 +47,18 @@ function pedidoInclude() {
   }
 }
 
+function validarMetodoPagamento(metodoPagamento) {
+  if (!['FIADO', 'PIX'].includes(metodoPagamento)) {
+    throw new PedidoError(400, 'Escolha uma forma de pagamento valida')
+  }
+
+  return metodoPagamento
+}
+
 async function criarPedido(req, res) {
   try {
     const itens = validarEAgruparItens(req.body.itens)
+    const metodoPagamento = validarMetodoPagamento(req.body.metodoPagamento)
 
     const pedido = await prisma.$transaction(async (tx) => {
       const produtos = await tx.produto.findMany({
@@ -83,6 +92,7 @@ async function criarPedido(req, res) {
         data: {
           usuarioId: req.usuario.id,
           status: 'FIADO',
+          metodoPagamento,
           valorTotal,
         },
       })

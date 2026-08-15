@@ -1,10 +1,12 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import AdminLayout from './layouts/AdminLayout'
+import FuncionarioLayout from './layouts/FuncionarioLayout'
+import CatalogoPage from './pages/CatalogoPage'
 import DashboardPage from './pages/DashboardPage'
-import FuncionarioHome from './pages/FuncionarioHome'
 import FuncionariosPage from './pages/FuncionariosPage'
 import Login from './pages/Login'
+import MeuSaldoPage from './pages/MeuSaldoPage'
 import PedidosPage from './pages/PedidosPage'
 import ProdutosPage from './pages/ProdutosPage'
 import './App.css'
@@ -58,10 +60,13 @@ function App() {
             path="/funcionario"
             element={(
               <ProtectedRoute papel="FUNCIONARIO">
-                <FuncionarioHome />
+                <FuncionarioLayout />
               </ProtectedRoute>
             )}
-          />
+          >
+            <Route index element={<CatalogoPage />} />
+            <Route path="saldo" element={<MeuSaldoPage />} />
+          </Route>
         </Routes>
       </BrowserRouter>
     </AuthProvider>

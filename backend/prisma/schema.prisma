@@ -17,6 +17,11 @@ enum StatusPedido {
   PAGO
 }
 
+enum MetodoPagamento {
+  FIADO
+  PIX
+}
+
 model Usuario {
   id       String   @id @default(uuid())
   nome     String
@@ -43,14 +48,15 @@ model Produto {
 }
 
 model Pedido {
-  id         String       @id @default(uuid())
-  usuario    Usuario      @relation(fields: [usuarioId], references: [id])
-  usuarioId  String
-  status     StatusPedido @default(FIADO)
-  valorTotal Decimal      @db.Decimal(10, 2)
-  criadoEm   DateTime     @default(now())
-  pagoEm     DateTime?
-  itens      ItemPedido[]
+  id              String          @id @default(uuid())
+  usuario         Usuario         @relation(fields: [usuarioId], references: [id])
+  usuarioId       String
+  status          StatusPedido    @default(FIADO)
+  metodoPagamento MetodoPagamento
+  valorTotal      Decimal         @db.Decimal(10, 2)
+  criadoEm        DateTime        @default(now())
+  pagoEm          DateTime?
+  itens           ItemPedido[]
 
   @@map("pedidos")
 }

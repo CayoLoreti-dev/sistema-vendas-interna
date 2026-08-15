@@ -95,12 +95,14 @@ button:disabled {
   padding: 10px 12px;
 }
 
-.admin-shell {
+.admin-shell,
+.funcionario-shell {
   background: #f5f7fa;
   min-height: 100vh;
 }
 
-.admin-topbar {
+.admin-topbar,
+.funcionario-topbar {
   align-items: center;
   background: #ffffff;
   border-bottom: 1px solid #d9e1ea;
@@ -110,13 +112,15 @@ button:disabled {
   padding: 16px 24px;
 }
 
-.admin-nav {
+.admin-nav,
+.funcionario-nav {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
 }
 
-.admin-nav a {
+.admin-nav a,
+.funcionario-nav a {
   border-radius: 6px;
   color: #253858;
   font-weight: 700;
@@ -125,15 +129,202 @@ button:disabled {
 }
 
 .admin-nav a.active,
-.admin-nav a:hover {
+.admin-nav a:hover,
+.funcionario-nav a.active,
+.funcionario-nav a:hover {
   background: #e9f2fb;
   color: #2f5d8a;
 }
 
-.admin-content {
+.admin-content,
+.funcionario-content {
   margin: 0 auto;
   max-width: 1120px;
   padding: 28px 24px;
+}
+
+.catalog-page {
+  padding-bottom: 180px;
+}
+
+.catalog-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.product-card {
+  background: #ffffff;
+  border: 1px solid #d9e1ea;
+  border-radius: 8px;
+  display: grid;
+  gap: 18px;
+  padding: 20px;
+}
+
+.product-card.disabled {
+  background: #f4f5f7;
+  opacity: 0.72;
+}
+
+.product-card span {
+  color: #5e6c84;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.product-card h2 {
+  color: #172b4d;
+  font-size: 1.2rem;
+  margin: 6px 0;
+}
+
+.product-card strong {
+  color: #172b4d;
+  font-size: 1.35rem;
+}
+
+.product-card p {
+  color: #5e6c84;
+  margin: 8px 0 0;
+}
+
+.product-actions {
+  display: grid;
+  gap: 12px;
+}
+
+.product-actions input,
+.cart-panel input {
+  max-width: 120px;
+}
+
+.cart-panel {
+  background: #ffffff;
+  border-top: 1px solid #d9e1ea;
+  bottom: 0;
+  box-shadow: 0 -12px 30px rgba(23, 43, 77, 0.12);
+  display: grid;
+  gap: 14px;
+  left: 0;
+  padding: 16px 24px;
+  position: fixed;
+  right: 0;
+  z-index: 20;
+}
+
+.cart-panel > * {
+  margin: 0 auto;
+  max-width: 1120px;
+  width: 100%;
+}
+
+.cart-header,
+.cart-panel li,
+.checkout-list li,
+.checkout-total {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.cart-header strong,
+.cart-header span,
+.checkout-total strong {
+  color: #172b4d;
+  font-size: 1.2rem;
+}
+
+.cart-panel ul,
+.checkout-list {
+  display: grid;
+  gap: 10px;
+  list-style: none;
+  padding: 0;
+}
+
+.cart-panel li {
+  border-top: 1px solid #edf1f5;
+  padding-top: 10px;
+}
+
+.checkout-backdrop {
+  align-items: center;
+  background: rgba(23, 43, 77, 0.38);
+  display: flex;
+  inset: 0;
+  justify-content: center;
+  padding: 24px;
+  position: fixed;
+  z-index: 30;
+}
+
+.checkout-panel {
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 24px 60px rgba(23, 43, 77, 0.2);
+  display: grid;
+  gap: 18px;
+  max-width: 560px;
+  padding: 24px;
+  width: 100%;
+}
+
+.checkout-list li {
+  border-bottom: 1px solid #edf1f5;
+  padding-bottom: 10px;
+}
+
+.checkout-total {
+  background: #f5f7fa;
+  border-radius: 8px;
+  padding: 14px;
+}
+
+.payment-options {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.payment-options button {
+  min-height: 64px;
+}
+
+.balance-card {
+  background: #ffffff;
+  border: 1px solid #d9e1ea;
+  border-radius: 8px;
+  display: grid;
+  gap: 8px;
+  padding: 24px;
+}
+
+.balance-card span {
+  color: #253858;
+  font-weight: 700;
+}
+
+.balance-card strong {
+  color: #172b4d;
+  font-size: 2.2rem;
+}
+
+.positive-panel {
+  display: grid;
+  gap: 8px;
+}
+
+.positive-panel h2 {
+  color: #237804;
+  font-size: 1.25rem;
+  margin: 0;
+}
+
+.positive-panel p {
+  color: #5e6c84;
+  margin: 0;
 }
 
 .page-stack {
@@ -398,8 +589,15 @@ th {
   }
 
   .admin-nav a,
-  .admin-topbar button {
+  .admin-topbar button,
+  .funcionario-nav a,
+  .funcionario-topbar button {
     text-align: center;
+  }
+
+  .funcionario-topbar {
+    align-items: stretch;
+    flex-direction: column;
   }
 
   .order-header,
@@ -411,5 +609,19 @@ th {
 
   .recent-orders a {
     grid-template-columns: 1fr;
+  }
+
+  .cart-panel {
+    padding: 14px;
+  }
+
+  .cart-panel li,
+  .payment-options {
+    grid-template-columns: 1fr;
+  }
+
+  .cart-panel li {
+    align-items: stretch;
+    display: grid;
   }
 }
