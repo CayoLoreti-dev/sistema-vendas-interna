@@ -111,6 +111,7 @@ function AdminLayout() {
           <NavLink to="/admin/produtos">Produtos</NavLink>
           <NavLink to="/admin/funcionarios">Funcionarios</NavLink>
           <NavLink to="/admin/pedidos">Pedidos</NavLink>
+          <NavLink to="/admin/faturas">Faturas</NavLink>
         </nav>
 
         <div className="admin-actions">

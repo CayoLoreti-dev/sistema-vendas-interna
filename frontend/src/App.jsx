@@ -4,6 +4,7 @@ import AdminLayout from './layouts/AdminLayout'
 import FuncionarioLayout from './layouts/FuncionarioLayout'
 import CatalogoPage from './pages/CatalogoPage'
 import DashboardPage from './pages/DashboardPage'
+import FaturasPage from './pages/FaturasPage'
 import FuncionariosPage from './pages/FuncionariosPage'
 import Login from './pages/Login'
 import MeuSaldoPage from './pages/MeuSaldoPage'
@@ -55,6 +56,7 @@ function App() {
             <Route path="produtos" element={<ProdutosPage />} />
             <Route path="funcionarios" element={<FuncionariosPage />} />
             <Route path="pedidos" element={<PedidosPage />} />
+            <Route path="faturas" element={<FaturasPage />} />
           </Route>
           <Route
             path="/funcionario"
