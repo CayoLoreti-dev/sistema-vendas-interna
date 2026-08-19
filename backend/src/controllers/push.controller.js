@@ -26,7 +26,7 @@ async function subscribe(req, res) {
     },
   })
 
-  return res.status(201).json({ id: subscription.id })
+  return res.status(200).json({ id: subscription.id })
 }
 
 module.exports = {
