@@ -4,7 +4,7 @@ import { api } from '../services/api'
 const funcionarioInicial = {
   nome: '',
   telefone: '',
-  pin: '',
+  senha: '',
 }
 
 function FuncionariosPage() {
@@ -45,8 +45,8 @@ function FuncionariosPage() {
     setErro('')
     setMensagem('')
 
-    if (!/^\d{4,6}$/.test(form.pin)) {
-      setErro('O PIN deve ter entre 4 e 6 numeros.')
+    if (!/^\d{9}$/.test(form.telefone)) {
+      setErro('O telefone deve ter exatamente 9 numeros.')
       return
     }
 
@@ -56,7 +56,7 @@ function FuncionariosPage() {
       await api.post('/usuarios', {
         nome: form.nome,
         telefone: form.telefone,
-        pin: form.pin,
+        senha: form.senha,
         papel: 'FUNCIONARIO',
       })
 
@@ -98,8 +98,9 @@ function FuncionariosPage() {
           <label>
             Telefone
             <input
-              inputMode="tel"
-              onChange={(event) => atualizarCampo('telefone', event.target.value)}
+              inputMode="numeric"
+              maxLength={9}
+              onChange={(event) => atualizarCampo('telefone', event.target.value.replace(/\D/g, ''))}
               required
               type="tel"
               value={form.telefone}
@@ -107,15 +108,12 @@ function FuncionariosPage() {
           </label>
 
           <label>
-            PIN
+            Senha
             <input
-              inputMode="numeric"
-              maxLength={6}
-              onChange={(event) => atualizarCampo('pin', event.target.value)}
-              pattern="[0-9]*"
+              onChange={(event) => atualizarCampo('senha', event.target.value)}
               required
               type="password"
-              value={form.pin}
+              value={form.senha}
             />
           </label>
         </div>

@@ -4,6 +4,7 @@ import { ThemeProvider } from './context/ThemeContext'
 import AdminLayout from './layouts/AdminLayout'
 import FuncionarioLayout from './layouts/FuncionarioLayout'
 import CatalogoPage from './pages/CatalogoPage'
+import Cadastro from './pages/Cadastro'
 import DashboardPage from './pages/DashboardPage'
 import FaturasPage from './pages/FaturasPage'
 import FuncionariosPage from './pages/FuncionariosPage'
@@ -54,6 +55,7 @@ function App() {
           <Routes>
             <Route path="/" element={<HomeRedirect />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/cadastro" element={<Cadastro />} />
             <Route
               path="/admin"
               element={(

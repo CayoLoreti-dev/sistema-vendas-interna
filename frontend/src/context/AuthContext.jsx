@@ -27,8 +27,8 @@ export function AuthProvider({ children }) {
     }
   }, [])
 
-  async function login(telefone, pin) {
-    const auth = await api.post('/auth/login', { telefone, pin })
+  async function login(telefone, senha) {
+    const auth = await api.post('/auth/login', { telefone, senha })
 
     setUsuario(auth.usuario)
     setToken(auth.token)

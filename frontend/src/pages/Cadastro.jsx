@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { api } from '../services/api'
 
-function Login() {
+function Cadastro() {
   const navigate = useNavigate()
   const { login } = useAuth()
+  const [nome, setNome] = useState('')
   const [telefone, setTelefone] = useState('')
   const [senha, setSenha] = useState('')
   const [erro, setErro] = useState('')
@@ -13,15 +15,29 @@ function Login() {
   async function handleSubmit(event) {
     event.preventDefault()
     setErro('')
+
+    if (!/^\d{9}$/.test(telefone)) {
+      setErro('Informe um telefone com exatamente 9 numeros.')
+      return
+    }
+
     setCarregando(true)
 
     try {
-      const auth = await login(telefone, senha)
-      navigate(auth.usuario.papel === 'ADMIN' ? '/admin' : '/funcionario', {
-        replace: true,
+      await api.post('/usuarios/cadastro', {
+        nome,
+        telefone,
+        senha,
       })
-    } catch {
-      setErro('Telefone ou senha invalidos')
+
+      await login(telefone, senha)
+      navigate('/funcionario', { replace: true })
+    } catch (error) {
+      if (error.message === 'Telefone ja cadastrado') {
+        setErro('Esse telefone ja esta cadastrado.')
+      } else {
+        setErro('Nao foi possivel criar sua conta agora.')
+      }
     } finally {
       setCarregando(false)
     }
@@ -32,15 +48,27 @@ function Login() {
       <form className="auth-card" onSubmit={handleSubmit}>
         <div>
           <p className="eyebrow brand-name">Vendas Interna</p>
-          <h1>Entrar</h1>
+          <h1>Criar conta</h1>
         </div>
+
+        <label>
+          Nome
+          <input
+            autoComplete="name"
+            onChange={(event) => setNome(event.target.value)}
+            required
+            type="text"
+            value={nome}
+          />
+        </label>
 
         <label>
           Telefone
           <input
             autoComplete="tel"
-            inputMode="tel"
-            onChange={(event) => setTelefone(event.target.value)}
+            inputMode="numeric"
+            maxLength={9}
+            onChange={(event) => setTelefone(event.target.value.replace(/\D/g, ''))}
             required
             type="tel"
             value={telefone}
@@ -50,7 +78,7 @@ function Login() {
         <label>
           Senha
           <input
-            autoComplete="current-password"
+            autoComplete="new-password"
             onChange={(event) => setSenha(event.target.value)}
             required
             type="password"
@@ -61,15 +89,15 @@ function Login() {
         {erro && <p className="error">{erro}</p>}
 
         <button disabled={carregando} type="submit">
-          {carregando ? 'Entrando...' : 'Entrar'}
+          {carregando ? 'Criando...' : 'Criar conta'}
         </button>
 
         <p className="auth-link">
-          Primeiro acesso? <Link to="/cadastro">Criar conta</Link>
+          Ja tenho conta. <Link to="/login">Entrar</Link>
         </p>
       </form>
     </main>
   )
 }
 
-export default Login
+export default Cadastro

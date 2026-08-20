@@ -6,15 +6,20 @@ function removerSenha(usuario) {
   return usuarioSemSenha
 }
 
-async function criarUsuario(req, res) {
-  const { nome, telefone, pin, papel } = req.body
+function obterSenha(req) {
+  return req.body.senha ?? req.body.pin
+}
 
-  if (!nome || !telefone || !pin) {
-    return res.status(400).json({ mensagem: 'Nome, telefone e pin sao obrigatorios' })
+async function criarUsuario(req, res) {
+  const { nome, telefone, papel } = req.body
+  const senhaInformada = obterSenha(req)
+
+  if (!nome || !telefone || !senhaInformada) {
+    return res.status(400).json({ mensagem: 'Nome, telefone e senha sao obrigatorios' })
   }
 
-  if (!/^\d{4,6}$/.test(pin)) {
-    return res.status(400).json({ mensagem: 'PIN deve conter entre 4 e 6 digitos numericos' })
+  if (!/^\d{9}$/.test(telefone)) {
+    return res.status(400).json({ mensagem: 'Telefone deve conter exatamente 9 numeros' })
   }
 
   if (!['ADMIN', 'FUNCIONARIO'].includes(papel)) {
@@ -22,7 +27,7 @@ async function criarUsuario(req, res) {
   }
 
   try {
-    const senha = await bcrypt.hash(pin, 10)
+    const senha = await bcrypt.hash(senhaInformada, 10)
 
     const usuario = await prisma.usuario.create({
       data: {
@@ -30,6 +35,40 @@ async function criarUsuario(req, res) {
         telefone,
         senha,
         papel,
+      },
+    })
+
+    return res.status(201).json(removerSenha(usuario))
+  } catch (error) {
+    if (error.code === 'P2002') {
+      return res.status(409).json({ mensagem: 'Telefone ja cadastrado' })
+    }
+
+    return res.status(500).json({ mensagem: 'Erro ao criar usuario' })
+  }
+}
+
+async function cadastrarFuncionario(req, res) {
+  const { nome, telefone } = req.body
+  const senhaInformada = obterSenha(req)
+
+  if (!nome || !telefone || !senhaInformada) {
+    return res.status(400).json({ mensagem: 'Nome, telefone e senha sao obrigatorios' })
+  }
+
+  if (!/^\d{9}$/.test(telefone)) {
+    return res.status(400).json({ mensagem: 'Telefone deve conter exatamente 9 numeros' })
+  }
+
+  try {
+    const senha = await bcrypt.hash(senhaInformada, 10)
+
+    const usuario = await prisma.usuario.create({
+      data: {
+        nome,
+        telefone,
+        senha,
+        papel: 'FUNCIONARIO',
       },
     })
 
@@ -61,6 +100,7 @@ async function listarUsuarios(req, res) {
 }
 
 module.exports = {
+  cadastrarFuncionario,
   criarUsuario,
   listarUsuarios,
 }

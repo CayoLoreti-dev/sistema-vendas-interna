@@ -39,6 +39,23 @@
   width: 100%;
 }
 
+.auth-link {
+  color: var(--color-text-muted);
+  margin: 0;
+  text-align: center;
+}
+
+.auth-link a {
+  color: var(--color-accent);
+  font-weight: 750;
+  text-decoration: none;
+}
+
+.auth-link a:hover {
+  color: var(--color-accent-hover);
+  text-decoration: underline;
+}
+
 .eyebrow {
   color: var(--color-accent);
   font-size: 0.78rem;

@@ -3,9 +3,10 @@ const jwt = require('jsonwebtoken')
 const prisma = require('../lib/prisma')
 
 async function login(req, res) {
-  const { telefone, pin } = req.body
+  const { telefone, pin, senha } = req.body
+  const senhaInformada = senha ?? pin
 
-  if (!telefone || !pin) {
+  if (!telefone || !senhaInformada) {
     return res.status(401).json({ mensagem: 'Credenciais invalidas' })
   }
 
@@ -17,9 +18,9 @@ async function login(req, res) {
     return res.status(401).json({ mensagem: 'Credenciais invalidas' })
   }
 
-  const pinValido = await bcrypt.compare(pin, usuario.senha)
+  const senhaValida = await bcrypt.compare(senhaInformada, usuario.senha)
 
-  if (!pinValido) {
+  if (!senhaValida) {
     return res.status(401).json({ mensagem: 'Credenciais invalidas' })
   }
 
