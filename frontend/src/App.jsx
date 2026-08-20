@@ -1,5 +1,6 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
+import { ThemeProvider } from './context/ThemeContext'
 import AdminLayout from './layouts/AdminLayout'
 import FuncionarioLayout from './layouts/FuncionarioLayout'
 import CatalogoPage from './pages/CatalogoPage'
@@ -47,39 +48,41 @@ function ProtectedRoute({ papel, children }) {
 
 function App() {
   return (
-    <AuthProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<HomeRedirect />} />
-          <Route path="/login" element={<Login />} />
-          <Route
-            path="/admin"
-            element={(
-              <ProtectedRoute papel="ADMIN">
-                <AdminLayout />
-              </ProtectedRoute>
-            )}
-          >
-            <Route index element={<DashboardPage />} />
-            <Route path="produtos" element={<ProdutosPage />} />
-            <Route path="funcionarios" element={<FuncionariosPage />} />
-            <Route path="pedidos" element={<PedidosPage />} />
-            <Route path="faturas" element={<FaturasPage />} />
-          </Route>
-          <Route
-            path="/funcionario"
-            element={(
-              <ProtectedRoute papel="FUNCIONARIO">
-                <FuncionarioLayout />
-              </ProtectedRoute>
-            )}
-          >
-            <Route index element={<CatalogoPage />} />
-            <Route path="saldo" element={<MeuSaldoPage />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<HomeRedirect />} />
+            <Route path="/login" element={<Login />} />
+            <Route
+              path="/admin"
+              element={(
+                <ProtectedRoute papel="ADMIN">
+                  <AdminLayout />
+                </ProtectedRoute>
+              )}
+            >
+              <Route index element={<DashboardPage />} />
+              <Route path="produtos" element={<ProdutosPage />} />
+              <Route path="funcionarios" element={<FuncionariosPage />} />
+              <Route path="pedidos" element={<PedidosPage />} />
+              <Route path="faturas" element={<FaturasPage />} />
+            </Route>
+            <Route
+              path="/funcionario"
+              element={(
+                <ProtectedRoute papel="FUNCIONARIO">
+                  <FuncionarioLayout />
+                </ProtectedRoute>
+              )}
+            >
+              <Route index element={<CatalogoPage />} />
+              <Route path="saldo" element={<MeuSaldoPage />} />
+            </Route>
+          </Routes>
+        </BrowserRouter>
+      </AuthProvider>
+    </ThemeProvider>
   )
 }
 

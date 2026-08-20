@@ -1,4 +1,5 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
+import ThemeToggle from '../components/ThemeToggle'
 import { useAuth } from '../context/AuthContext'
 
 function FuncionarioLayout() {
@@ -23,7 +24,10 @@ function FuncionarioLayout() {
           <NavLink to="/funcionario/saldo">Meu saldo</NavLink>
         </nav>
 
-        <button type="button" onClick={handleLogout}>Sair</button>
+        <div className="admin-actions">
+          <ThemeToggle />
+          <button type="button" onClick={handleLogout}>Sair</button>
+        </div>
       </header>
 
       <main className="funcionario-content">

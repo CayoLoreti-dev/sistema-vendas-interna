@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
+import ThemeToggle from '../components/ThemeToggle'
 import { useAuth } from '../context/AuthContext'
 import { api } from '../services/api'
 
@@ -115,6 +116,7 @@ function AdminLayout() {
         </nav>
 
         <div className="admin-actions">
+          <ThemeToggle />
           {!verificandoNotificacao && !subscriptionAtiva && (
             <button
               className="secondary-button"
