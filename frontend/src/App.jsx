@@ -48,16 +48,6 @@ function ProtectedRoute({ papeis, papel, children }) {
   return children
 }
 
-function AdminIndex() {
-  const { usuario } = useAuth()
-
-  if (usuario?.papel === 'VENDEDOR') {
-    return <Navigate to="/admin/faturas" replace />
-  }
-
-  return <DashboardPage />
-}
-
 function App() {
   return (
     <ThemeProvider>
@@ -75,7 +65,7 @@ function App() {
                 </ProtectedRoute>
               )}
             >
-              <Route index element={<AdminIndex />} />
+              <Route index element={<DashboardPage />} />
               <Route path="produtos" element={<ProdutosPage />} />
               <Route path="funcionarios" element={<FuncionariosPage />} />
               <Route path="pedidos" element={<PedidosPage />} />

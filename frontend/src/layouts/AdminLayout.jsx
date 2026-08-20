@@ -115,7 +115,7 @@ function AdminLayout() {
         </div>
 
         <nav className="admin-nav sidebar-nav" aria-label="Navegacao administrativa">
-          {isMaster && <NavLink to="/admin" end>Dashboard</NavLink>}
+          <NavLink to="/admin" end>Dashboard</NavLink>
           <NavLink to="/admin/produtos">Produtos</NavLink>
           <NavLink to="/admin/funcionarios">Clientes</NavLink>
           <NavLink to="/admin/pedidos">Pedidos</NavLink>
