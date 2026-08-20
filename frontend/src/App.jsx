@@ -13,7 +13,11 @@ import ProdutosPage from './pages/ProdutosPage'
 import './App.css'
 
 function HomeRedirect() {
-  const { usuario } = useAuth()
+  const { usuario, carregando } = useAuth()
+
+  if (carregando) {
+    return null
+  }
 
   if (!usuario) {
     return <Navigate to="/login" replace />
@@ -28,7 +32,11 @@ function HomeRedirect() {
 }
 
 function ProtectedRoute({ papel, children }) {
-  const { usuario } = useAuth()
+  const { usuario, carregando } = useAuth()
+
+  if (carregando) {
+    return null
+  }
 
   if (!usuario || usuario.papel !== papel) {
     return <Navigate to="/login" replace />

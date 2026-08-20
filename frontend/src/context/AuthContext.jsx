@@ -6,11 +6,13 @@ const AuthContext = createContext(null)
 export function AuthProvider({ children }) {
   const [usuario, setUsuario] = useState(null)
   const [token, setToken] = useState(null)
+  const [carregando, setCarregando] = useState(true)
 
   useEffect(() => {
     const storedAuth = localStorage.getItem(AUTH_STORAGE_KEY)
 
     if (!storedAuth) {
+      setCarregando(false)
       return
     }
 
@@ -20,6 +22,8 @@ export function AuthProvider({ children }) {
       setToken(auth.token || null)
     } catch {
       localStorage.removeItem(AUTH_STORAGE_KEY)
+    } finally {
+      setCarregando(false)
     }
   }, [])
 
@@ -42,9 +46,10 @@ export function AuthProvider({ children }) {
   const value = useMemo(() => ({
     usuario,
     token,
+    carregando,
     login,
     logout,
-  }), [usuario, token])
+  }), [usuario, token, carregando])
 
   return (
     <AuthContext.Provider value={value}>
