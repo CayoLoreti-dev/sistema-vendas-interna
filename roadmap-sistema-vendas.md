@@ -41,28 +41,28 @@ Objetivo: sair do zero até a vendedora e os funcionários usando de verdade, no
 
 ---
 
-## 🔲 Fase 5 — Frontend: esqueleto e autenticação
-- [ ] `react-router-dom`: rotas base da aplicação
-- [ ] Serviço de API (`src/services/api.js`) — wrapper de fetch/axios que injeta o token JWT automaticamente e trata erro 401 (desloga e redireciona pro login)
-- [ ] `AuthContext`: guarda usuário logado + token, expõe `login()`/`logout()`, persiste sessão (ex: localStorage do token, ok nesse caso por não ser dado sensível como senha)
-- [ ] Tela de login (telefone + PIN)
-- [ ] Rotas protegidas: redireciona pro login se não autenticado; redireciona admin ↔ funcionário para os respectivos painéis
-- [ ] Config PWA: manifest, ícones, service worker básico (`vite-plugin-pwa`) — instalável no Android desde essa fase, mesmo com telas simples
+## ✅ Fase 5 — Frontend: esqueleto e autenticação — **concluída**
+- [x] `react-router-dom`: rotas base da aplicação
+- [x] Serviço de API (`src/services/api.js`) — wrapper de fetch/axios que injeta o token JWT automaticamente e trata erro 401 (desloga e redireciona pro login)
+- [x] `AuthContext`: guarda usuário logado + token, expõe `login()`/`logout()`, persiste sessão (ex: localStorage do token, ok nesse caso por não ser dado sensível como senha)
+- [x] Tela de login (telefone + PIN)
+- [x] Rotas protegidas: redireciona pro login se não autenticado; redireciona admin ↔ funcionário para os respectivos painéis
+- [x] Config PWA: manifest, ícones, service worker básico (`vite-plugin-pwa`) — instalável no Android desde essa fase, mesmo com telas simples
 
-## 🔲 Fase 6 — Painel da vendedora (admin)
-- [ ] Layout/navegação do admin
-- [ ] Dashboard: produtos com estoque baixo, total em aberto (fiado), pedidos recentes
-- [ ] CRUD de produtos (listar, criar, editar, excluir) — página completa consumindo `/produtos`
-- [ ] Cadastro de funcionário (consome `POST /usuarios`)
-- [ ] Lista de pedidos com filtro por status (fiado/pago)
-- [ ] Marcar pedido como pago
-- [ ] Ver saldo em aberto por funcionário (`GET /pedidos/saldo/:usuarioId`)
+## ✅ Fase 6 — Painel da vendedora (admin) — **concluída**
+- [x] Layout/navegação do admin
+- [x] Dashboard: produtos com estoque baixo, total em aberto (fiado), pedidos recentes
+- [x] CRUD de produtos (listar, criar, editar, excluir) — página completa consumindo `/produtos`
+- [x] Cadastro de funcionário (consome `POST /usuarios`)
+- [x] Lista de pedidos com filtro por status (fiado/pago)
+- [x] Marcar pedido como pago
+- [x] Ver saldo em aberto por funcionário (`GET /pedidos/saldo/:usuarioId`)
 
-## 🔲 Fase 7 — Painel do funcionário
-- [ ] Layout/navegação do funcionário
-- [ ] Catálogo de produtos (view-only, mostra estoque disponível)
-- [ ] Montar pedido (carrinho simples) e enviar (`POST /pedidos`)
-- [ ] Meu saldo + histórico de pedidos próprios (`GET /pedidos/meu-saldo`)
+## ✅ Fase 7 — Painel do funcionário — **concluída**
+- [x] Layout/navegação do funcionário
+- [x] Catálogo de produtos (view-only, mostra estoque disponível)
+- [x] Montar pedido (carrinho simples) e enviar (`POST /pedidos`)
+- [x] Meu saldo + histórico de pedidos próprios (`GET /pedidos/meu-saldo`)
 
 ## 🔲 Fase 8 — Integração e teste ponta a ponta
 - [ ] Testar sozinho o fluxo completo: cadastra produto → funcionário pede → estoque desconta → marca como pago
@@ -84,5 +84,11 @@ Objetivo: sair do zero até a vendedora e os funcionários usando de verdade, no
 
 ## O que cortar do MVP pra ganhar velocidade
 - Relatórios/gráficos bonitos (um total simples no dashboard já resolve no início)
-- Notificações (push, e-mail de cobrança de fiado)
+- E-mail de cobrança de fiado (notificações push foram implementadas como extra)
 - Edição de pedido já feito (por enquanto: cancelar e criar de novo)
+
+## Funcionalidades extras implementadas fora do escopo original
+- Notificações push
+- Tela de Faturas agrupada por cliente
+- Redesign com tema escuro
+- Helmet e rate limiting no login

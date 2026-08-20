@@ -1,0 +1,9 @@
+{
+  "name": "sistema-vendas-interna",
+  "private": true,
+  "scripts": {
+    "start": "node backend/src/server.js",
+    "build": "cd frontend && npm install && npm run build",
+    "postinstall": "cd backend && npm install"
+  }
+}

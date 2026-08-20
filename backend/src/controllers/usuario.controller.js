@@ -17,6 +17,10 @@ async function criarUsuario(req, res) {
     return res.status(400).json({ mensagem: 'PIN deve conter entre 4 e 6 digitos numericos' })
   }
 
+  if (!['ADMIN', 'FUNCIONARIO'].includes(papel)) {
+    return res.status(400).json({ erro: 'Papel inválido. Use ADMIN ou FUNCIONARIO.' })
+  }
+
   try {
     const senha = await bcrypt.hash(pin, 10)
 
