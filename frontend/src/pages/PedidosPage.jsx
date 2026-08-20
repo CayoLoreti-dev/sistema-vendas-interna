@@ -23,6 +23,10 @@ function statusLabel(status) {
   return status === 'PAGO' ? 'Pago' : 'Em aberto'
 }
 
+function metodoLabel(metodoPagamento) {
+  return metodoPagamento === 'PIX' ? 'Pix combinado' : 'Fiado'
+}
+
 function PedidosPage() {
   const [status, setStatus] = useState('')
   const [pedidos, setPedidos] = useState([])
@@ -113,6 +117,9 @@ function PedidosPage() {
                 <div>
                   <strong>{pedido.usuario.nome}</strong>
                   <span>{formatarData(pedido.criadoEm)}</span>
+                  <span className={`method-badge ${pedido.metodoPagamento === 'PIX' ? 'pix' : 'fiado'}`}>
+                    {metodoLabel(pedido.metodoPagamento)}
+                  </span>
                 </div>
 
                 <span className={`status-badge ${pedido.status === 'PAGO' ? 'paid' : 'open'}`}>
