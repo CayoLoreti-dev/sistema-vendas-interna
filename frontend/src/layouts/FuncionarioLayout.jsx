@@ -30,12 +30,15 @@ function FuncionarioLayout() {
         </nav>
 
         <div className="admin-actions sidebar-actions">
-          <ThemeToggle />
           <button type="button" onClick={handleLogout}>Sair</button>
         </div>
       </aside>
 
       <main className="funcionario-content app-content">
+        <div className="app-topbar">
+          <ThemeToggle />
+        </div>
+
         <Outlet />
       </main>
     </div>

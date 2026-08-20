@@ -85,6 +85,12 @@ function AdminLayout() {
       }
 
       const { publicKey } = await api.get('/push/vapid-public-key')
+
+      if (!publicKey) {
+        setNotificacaoMensagem('Notificacoes ainda nao foram configuradas no servidor.')
+        return
+      }
+
       const subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: urlBase64ToUint8Array(publicKey),
@@ -93,8 +99,8 @@ function AdminLayout() {
       await api.post('/push/subscribe', subscription.toJSON())
       setSubscriptionAtiva(true)
       setNotificacaoMensagem('Notificacoes ativadas neste aparelho.')
-    } catch {
-      setNotificacaoMensagem('Nao foi possivel ativar as notificacoes agora.')
+    } catch (error) {
+      setNotificacaoMensagem(error.message || 'Nao foi possivel ativar as notificacoes agora.')
     } finally {
       setAtivandoNotificacao(false)
     }
@@ -123,7 +129,6 @@ function AdminLayout() {
         </nav>
 
         <div className="admin-actions sidebar-actions">
-          <ThemeToggle />
           {!verificandoNotificacao && !subscriptionAtiva && (
             <button
               className="secondary-button"
@@ -139,6 +144,10 @@ function AdminLayout() {
       </aside>
 
       <main className="admin-content app-content">
+        <div className="app-topbar">
+          <ThemeToggle />
+        </div>
+
         {notificacaoMensagem && (
           <p className={subscriptionAtiva ? 'success' : 'error'}>{notificacaoMensagem}</p>
         )}

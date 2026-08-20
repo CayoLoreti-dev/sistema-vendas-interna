@@ -152,13 +152,27 @@ button:disabled {
   background: var(--color-surface-soft);
   border-color: var(--color-border);
   color: var(--color-text);
-  min-width: 86px;
+  border-radius: 999px;
+  min-height: 42px;
+  min-width: 42px;
+  padding: 0;
+  width: 42px;
 }
 
 .theme-toggle:hover {
   background: var(--color-accent-soft);
   border-color: color-mix(in srgb, var(--color-accent) 48%, var(--color-border));
   color: var(--color-accent);
+}
+
+.theme-toggle svg {
+  fill: none;
+  height: 20px;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
+  width: 20px;
 }
 
 .valor-mono {
@@ -341,6 +355,12 @@ button:disabled {
   max-width: 1180px;
   padding: 30px 24px;
   width: 100%;
+}
+
+.app-topbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 18px;
 }
 
 .app-content {

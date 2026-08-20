@@ -1,6 +1,10 @@
 const prisma = require('../lib/prisma')
 
 function vapidPublicKey(req, res) {
+  if (!process.env.VAPID_PUBLIC_KEY) {
+    return res.status(503).json({ mensagem: 'Notificacoes ainda nao foram configuradas no servidor' })
+  }
+
   return res.json({ publicKey: process.env.VAPID_PUBLIC_KEY })
 }
 
