@@ -18,8 +18,8 @@ async function criarUsuario(req, res) {
     return res.status(400).json({ mensagem: 'Nome, telefone e senha sao obrigatorios' })
   }
 
-  if (!/^\d{9}$/.test(telefone)) {
-    return res.status(400).json({ mensagem: 'Telefone deve conter exatamente 9 numeros' })
+  if (!/^\d{11}$/.test(telefone)) {
+    return res.status(400).json({ mensagem: 'Telefone deve conter exatamente 11 numeros' })
   }
 
   if (!['ADMIN', 'FUNCIONARIO'].includes(papel)) {
@@ -56,8 +56,8 @@ async function cadastrarFuncionario(req, res) {
     return res.status(400).json({ mensagem: 'Nome, telefone e senha sao obrigatorios' })
   }
 
-  if (!/^\d{9}$/.test(telefone)) {
-    return res.status(400).json({ mensagem: 'Telefone deve conter exatamente 9 numeros' })
+  if (!/^\d{11}$/.test(telefone)) {
+    return res.status(400).json({ mensagem: 'Telefone deve conter exatamente 11 numeros' })
   }
 
   try {

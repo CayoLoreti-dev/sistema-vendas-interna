@@ -45,8 +45,8 @@ function FuncionariosPage() {
     setErro('')
     setMensagem('')
 
-    if (!/^\d{9}$/.test(form.telefone)) {
-      setErro('O telefone deve ter exatamente 9 numeros.')
+    if (!/^\d{11}$/.test(form.telefone)) {
+      setErro('O telefone deve ter exatamente 11 numeros.')
       return
     }
 
@@ -99,7 +99,7 @@ function FuncionariosPage() {
             Telefone
             <input
               inputMode="numeric"
-              maxLength={9}
+              maxLength={11}
               onChange={(event) => atualizarCampo('telefone', event.target.value.replace(/\D/g, ''))}
               required
               type="tel"

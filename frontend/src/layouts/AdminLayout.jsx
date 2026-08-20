@@ -101,13 +101,18 @@ function AdminLayout() {
 
   return (
     <div className="admin-shell">
-      <header className="admin-topbar">
-        <div>
+      <aside className="admin-sidebar">
+        <div className="sidebar-brand">
           <p className="eyebrow brand-name">Vendas Interna</p>
+          <span>Painel administrativo</span>
+        </div>
+
+        <div className="sidebar-user">
+          <span>Usuario</span>
           <strong>{usuario?.nome}</strong>
         </div>
 
-        <nav className="admin-nav" aria-label="Navegacao administrativa">
+        <nav className="admin-nav sidebar-nav" aria-label="Navegacao administrativa">
           <NavLink to="/admin" end>Dashboard</NavLink>
           <NavLink to="/admin/produtos">Produtos</NavLink>
           <NavLink to="/admin/funcionarios">Funcionarios</NavLink>
@@ -115,7 +120,7 @@ function AdminLayout() {
           <NavLink to="/admin/faturas">Faturas</NavLink>
         </nav>
 
-        <div className="admin-actions">
+        <div className="admin-actions sidebar-actions">
           <ThemeToggle />
           {!verificandoNotificacao && !subscriptionAtiva && (
             <button
@@ -129,9 +134,9 @@ function AdminLayout() {
           )}
           <button type="button" onClick={handleLogout}>Sair</button>
         </div>
-      </header>
+      </aside>
 
-      <main className="admin-content">
+      <main className="admin-content app-content">
         {notificacaoMensagem && (
           <p className={subscriptionAtiva ? 'success' : 'error'}>{notificacaoMensagem}</p>
         )}

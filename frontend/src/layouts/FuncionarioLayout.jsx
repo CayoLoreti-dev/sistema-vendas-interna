@@ -13,24 +13,29 @@ function FuncionarioLayout() {
 
   return (
     <div className="funcionario-shell">
-      <header className="funcionario-topbar">
-        <div>
+      <aside className="funcionario-sidebar">
+        <div className="sidebar-brand">
           <p className="eyebrow brand-name">Vendas Interna</p>
+          <span>Area do funcionario</span>
+        </div>
+
+        <div className="sidebar-user">
+          <span>Usuario</span>
           <strong>{usuario?.nome}</strong>
         </div>
 
-        <nav className="funcionario-nav" aria-label="Navegacao do funcionario">
+        <nav className="funcionario-nav sidebar-nav" aria-label="Navegacao do funcionario">
           <NavLink to="/funcionario" end>Catalogo</NavLink>
           <NavLink to="/funcionario/saldo">Meu saldo</NavLink>
         </nav>
 
-        <div className="admin-actions">
+        <div className="admin-actions sidebar-actions">
           <ThemeToggle />
           <button type="button" onClick={handleLogout}>Sair</button>
         </div>
-      </header>
+      </aside>
 
-      <main className="funcionario-content">
+      <main className="funcionario-content app-content">
         <Outlet />
       </main>
     </div>

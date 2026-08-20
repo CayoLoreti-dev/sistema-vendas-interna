@@ -16,8 +16,8 @@ function Cadastro() {
     event.preventDefault()
     setErro('')
 
-    if (!/^\d{9}$/.test(telefone)) {
-      setErro('Informe um telefone com exatamente 9 numeros.')
+    if (!/^\d{11}$/.test(telefone)) {
+      setErro('Informe um telefone com exatamente 11 numeros.')
       return
     }
 
@@ -67,7 +67,7 @@ function Cadastro() {
           <input
             autoComplete="tel"
             inputMode="numeric"
-            maxLength={9}
+            maxLength={11}
             onChange={(event) => setTelefone(event.target.value.replace(/\D/g, ''))}
             required
             type="tel"

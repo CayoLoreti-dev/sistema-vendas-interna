@@ -39,8 +39,9 @@ function Login() {
           Telefone
           <input
             autoComplete="tel"
-            inputMode="tel"
-            onChange={(event) => setTelefone(event.target.value)}
+            inputMode="numeric"
+            maxLength={11}
+            onChange={(event) => setTelefone(event.target.value.replace(/\D/g, ''))}
             required
             type="tel"
             value={telefone}
