@@ -19,34 +19,41 @@ function metodoLabel(metodoPagamento) {
 
 function FaturasPage() {
   const [faturas, setFaturas] = useState([])
+  const [produtos, setProdutos] = useState([])
   const [clienteSelecionadoId, setClienteSelecionadoId] = useState('')
+  const [produtoSelecionadoId, setProdutoSelecionadoId] = useState('')
+  const [quantidade, setQuantidade] = useState('1')
   const [carregando, setCarregando] = useState(true)
   const [pagandoId, setPagandoId] = useState(null)
+  const [adicionandoProduto, setAdicionandoProduto] = useState(false)
   const [erro, setErro] = useState('')
   const [mensagem, setMensagem] = useState('')
 
-  const clientesComConta = useMemo(() => (
-    faturas.filter((fatura) => fatura.total > 0 || fatura.pedidos.length > 0)
-  ), [faturas])
-
   const faturaSelecionada = useMemo(() => {
     if (!clienteSelecionadoId) {
-      return clientesComConta[0] || null
+      return faturas[0] || null
     }
 
-    return clientesComConta.find((fatura) => fatura.usuario.id === clienteSelecionadoId) || null
-  }, [clienteSelecionadoId, clientesComConta])
+    return faturas.find((fatura) => fatura.usuario.id === clienteSelecionadoId) || null
+  }, [clienteSelecionadoId, faturas])
+
+  const produtoSelecionado = useMemo(() => (
+    produtos.find((produto) => produto.id === produtoSelecionadoId) || null
+  ), [produtoSelecionadoId, produtos])
 
   const totalGeral = useMemo(() => (
-    clientesComConta.reduce((total, fatura) => total + Number(fatura.total), 0)
-  ), [clientesComConta])
+    faturas.reduce((total, fatura) => total + Number(fatura.total), 0)
+  ), [faturas])
 
   async function carregarFaturas() {
     setErro('')
     setCarregando(true)
 
     try {
-      const usuarios = await api.get('/usuarios')
+      const [usuarios, produtosCarregados] = await Promise.all([
+        api.get('/usuarios'),
+        api.get('/produtos'),
+      ])
       const funcionarios = usuarios.filter((usuario) => usuario.papel === 'FUNCIONARIO')
       const saldos = await Promise.all(funcionarios.map(async (usuario) => {
         const saldo = await api.get(`/pedidos/saldo/${usuario.id}`)
@@ -59,12 +66,20 @@ function FaturasPage() {
       }))
 
       setFaturas(saldos)
+      setProdutos(produtosCarregados)
       setClienteSelecionadoId((atual) => {
-        if (atual && saldos.some((fatura) => fatura.usuario.id === atual && fatura.pedidos.length > 0)) {
+        if (atual && saldos.some((fatura) => fatura.usuario.id === atual)) {
           return atual
         }
 
-        return saldos.find((fatura) => fatura.pedidos.length > 0)?.usuario.id || ''
+        return saldos[0]?.usuario.id || ''
+      })
+      setProdutoSelecionadoId((atual) => {
+        if (atual && produtosCarregados.some((produto) => produto.id === atual && produto.estoqueAtual > 0)) {
+          return atual
+        }
+
+        return produtosCarregados.find((produto) => produto.estoqueAtual > 0)?.id || ''
       })
     } catch {
       setErro('Nao foi possivel carregar as faturas. Tente novamente em instantes.')
@@ -127,6 +142,52 @@ function FaturasPage() {
     }
   }
 
+  async function adicionarProdutoNaFatura(event) {
+    event.preventDefault()
+
+    const quantidadeNumerica = Number(quantidade)
+
+    if (!faturaSelecionada || !produtoSelecionado) {
+      setErro('Escolha um cliente e um produto para adicionar na fatura.')
+      return
+    }
+
+    if (!Number.isInteger(quantidadeNumerica) || quantidadeNumerica <= 0) {
+      setErro('Informe uma quantidade valida.')
+      return
+    }
+
+    if (quantidadeNumerica > produtoSelecionado.estoqueAtual) {
+      setErro(`So existem ${produtoSelecionado.estoqueAtual} unidade(s) desse produto em estoque.`)
+      return
+    }
+
+    setErro('')
+    setMensagem('')
+    setAdicionandoProduto(true)
+
+    try {
+      await api.post('/pedidos/admin', {
+        usuarioId: faturaSelecionada.usuario.id,
+        metodoPagamento: 'FIADO',
+        itens: [
+          {
+            produtoId: produtoSelecionado.id,
+            quantidade: quantidadeNumerica,
+          },
+        ],
+      })
+
+      setMensagem(`Produto adicionado na fatura de ${faturaSelecionada.usuario.nome}.`)
+      setQuantidade('1')
+      await carregarFaturas()
+    } catch (error) {
+      setErro(error?.mensagem || 'Nao foi possivel adicionar o produto na fatura.')
+    } finally {
+      setAdicionandoProduto(false)
+    }
+  }
+
   return (
     <section className="page-stack">
       <div className="page-heading">
@@ -141,20 +202,20 @@ function FaturasPage() {
         <div className="page-panel">
           <p className="muted">Carregando faturas...</p>
         </div>
-      ) : clientesComConta.length === 0 ? (
+      ) : faturas.length === 0 ? (
         <div className="page-panel positive-panel">
-          <h2>Todo mundo esta em dia!</h2>
-          <p>Nenhum cliente tem pedido em aberto agora.</p>
+          <h2>Nenhum funcionario cadastrado</h2>
+          <p>Cadastre um funcionario antes de lancar produtos em uma fatura.</p>
         </div>
       ) : (
         <div className="invoice-layout">
-          <aside className="invoice-list" aria-label="Clientes com conta em aberto">
+          <aside className="invoice-list" aria-label="Clientes">
             <div className="invoice-total-card">
               <span>Total em aberto</span>
               <strong className="valor-mono">{moeda.format(totalGeral)}</strong>
             </div>
 
-            {clientesComConta.map((fatura) => (
+            {faturas.map((fatura) => (
               <button
                 className={faturaSelecionada?.usuario.id === fatura.usuario.id ? 'invoice-client active' : 'invoice-client'}
                 key={fatura.usuario.id}
@@ -188,8 +249,57 @@ function FaturasPage() {
                 </div>
               </div>
 
-              <div className="orders-list">
-                {faturaSelecionada.pedidos.map((pedido) => (
+              <form className="invoice-add-panel" onSubmit={adicionarProdutoNaFatura}>
+                <div>
+                  <p className="eyebrow">Lancamento manual</p>
+                  <h3>Adicionar produto na fatura</h3>
+                  <p className="muted">Use quando a vendedora entregar um produto direto para o cliente.</p>
+                </div>
+
+                <div className="invoice-add-form">
+                  <label>
+                    Produto
+                    <select
+                      onChange={(event) => setProdutoSelecionadoId(event.target.value)}
+                      required
+                      value={produtoSelecionadoId}
+                    >
+                      <option value="">Selecione</option>
+                      {produtos.map((produto) => (
+                        <option disabled={produto.estoqueAtual <= 0} key={produto.id} value={produto.id}>
+                          {produto.nome} - {moeda.format(Number(produto.preco))} - estoque {produto.estoqueAtual}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+
+                  <label>
+                    Quantidade
+                    <input
+                      className="valor-mono"
+                      min="1"
+                      onChange={(event) => setQuantidade(event.target.value)}
+                      required
+                      step="1"
+                      type="number"
+                      value={quantidade}
+                    />
+                  </label>
+
+                  <button disabled={adicionandoProduto || produtos.length === 0} type="submit">
+                    {adicionandoProduto ? 'Adicionando...' : 'Adicionar na fatura'}
+                  </button>
+                </div>
+              </form>
+
+              {faturaSelecionada.pedidos.length === 0 ? (
+                <div className="page-panel positive-panel">
+                  <h2>Cliente em dia</h2>
+                  <p>Essa fatura ainda nao tem pedidos em aberto.</p>
+                </div>
+              ) : (
+                <div className="orders-list">
+                  {faturaSelecionada.pedidos.map((pedido) => (
                   <article className="order-card" key={pedido.id}>
                     <div className="order-header">
                       <div>
@@ -223,8 +333,9 @@ function FaturasPage() {
                       </button>
                     </div>
                   </article>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </section>
           )}
         </div>

@@ -67,84 +67,109 @@ function metodoPagamentoLabel(metodoPagamento) {
   return metodoPagamento === 'PIX' ? 'Aguardando Pix' : 'Fiado'
 }
 
+async function criarPedidoParaUsuario(usuarioId, itensRecebidos, metodoPagamentoRecebido) {
+  const itens = validarEAgruparItens(itensRecebidos)
+  const metodoPagamento = validarMetodoPagamento(metodoPagamentoRecebido)
+
+  return prisma.$transaction(async (tx) => {
+    const usuario = await tx.usuario.findUnique({
+      where: { id: usuarioId },
+      select: { id: true },
+    })
+
+    if (!usuario) {
+      throw new PedidoError(404, 'Cliente nao encontrado')
+    }
+
+    const produtos = await tx.produto.findMany({
+      where: {
+        id: {
+          in: itens.map((item) => item.produtoId),
+        },
+      },
+    })
+
+    const produtosPorId = new Map(produtos.map((produto) => [produto.id, produto]))
+
+    for (const item of itens) {
+      const produto = produtosPorId.get(item.produtoId)
+
+      if (!produto) {
+        throw new PedidoError(400, `Produto ${item.produtoId} nao encontrado`)
+      }
+
+      if (produto.estoqueAtual < item.quantidade) {
+        throw new PedidoError(400, `Estoque insuficiente para o produto ${produto.nome}`)
+      }
+    }
+
+    const valorTotal = itens.reduce((total, item) => {
+      const produto = produtosPorId.get(item.produtoId)
+      return total.add(produto.preco.mul(item.quantidade))
+    }, new Prisma.Decimal(0))
+
+    const pedidoCriado = await tx.pedido.create({
+      data: {
+        usuarioId,
+        status: 'FIADO',
+        metodoPagamento,
+        valorTotal,
+      },
+    })
+
+    for (const item of itens) {
+      const produto = produtosPorId.get(item.produtoId)
+
+      const atualizacao = await tx.produto.updateMany({
+        where: {
+          id: item.produtoId,
+          estoqueAtual: {
+            gte: item.quantidade,
+          },
+        },
+        data: {
+          estoqueAtual: {
+            decrement: item.quantidade,
+          },
+        },
+      })
+
+      if (atualizacao.count !== 1) {
+        throw new PedidoError(400, `Estoque insuficiente para o produto ${produto.nome}`)
+      }
+
+      await tx.itemPedido.create({
+        data: {
+          pedidoId: pedidoCriado.id,
+          produtoId: item.produtoId,
+          quantidade: item.quantidade,
+          precoUnitario: produto.preco,
+        },
+      })
+    }
+
+    return tx.pedido.findUnique({
+      where: { id: pedidoCriado.id },
+      include: pedidoInclude(),
+    })
+  })
+}
+
+function responderErroPedido(error, res) {
+  if (error instanceof PedidoError) {
+    return res.status(error.status).json({ mensagem: error.mensagem })
+  }
+
+  return res.status(500).json({ mensagem: 'Erro ao criar pedido' })
+}
+
 async function criarPedido(req, res) {
   try {
-    const itens = validarEAgruparItens(req.body.itens)
-    const metodoPagamento = validarMetodoPagamento(req.body.metodoPagamento)
-
-    const pedido = await prisma.$transaction(async (tx) => {
-      const produtos = await tx.produto.findMany({
-        where: {
-          id: {
-            in: itens.map((item) => item.produtoId),
-          },
-        },
-      })
-
-      const produtosPorId = new Map(produtos.map((produto) => [produto.id, produto]))
-
-      for (const item of itens) {
-        const produto = produtosPorId.get(item.produtoId)
-
-        if (!produto) {
-          throw new PedidoError(400, `Produto ${item.produtoId} nao encontrado`)
-        }
-
-        if (produto.estoqueAtual < item.quantidade) {
-          throw new PedidoError(400, `Estoque insuficiente para o produto ${produto.nome}`)
-        }
-      }
-
-      const valorTotal = itens.reduce((total, item) => {
-        const produto = produtosPorId.get(item.produtoId)
-        return total.add(produto.preco.mul(item.quantidade))
-      }, new Prisma.Decimal(0))
-
-      const pedidoCriado = await tx.pedido.create({
-        data: {
-          usuarioId: req.usuario.id,
-          status: 'FIADO',
-          metodoPagamento,
-          valorTotal,
-        },
-      })
-
-      for (const item of itens) {
-        const produto = produtosPorId.get(item.produtoId)
-
-        const atualizacao = await tx.produto.updateMany({
-          where: {
-            id: item.produtoId,
-            estoqueAtual: {
-              gte: item.quantidade,
-            },
-          },
-          data: {
-            estoqueAtual: {
-              decrement: item.quantidade,
-            },
-          },
-        })
-
-        if (atualizacao.count !== 1) {
-          throw new PedidoError(400, `Estoque insuficiente para o produto ${produto.nome}`)
-        }
-
-        await tx.itemPedido.create({
-          data: {
-            pedidoId: pedidoCriado.id,
-            produtoId: item.produtoId,
-            quantidade: item.quantidade,
-            precoUnitario: produto.preco,
-          },
-        })
-      }
-
-      return tx.pedido.findUnique({
-        where: { id: pedidoCriado.id },
-        include: pedidoInclude(),
-      })
-    })
+    const pedido = await criarPedidoParaUsuario(
+      req.usuario.id,
+      req.body.itens,
+      req.body.metodoPagamento,
+    )
 
     enviarNotificacaoAdmins({
       title: 'Novo pedido!',
@@ -155,11 +180,25 @@ async function criarPedido(req, res) {
 
     return res.status(201).json(pedido)
   } catch (error) {
-    if (error instanceof PedidoError) {
-      return res.status(error.status).json({ mensagem: error.mensagem })
-    }
+    return responderErroPedido(error, res)
+  }
+}
 
-    return res.status(500).json({ mensagem: 'Erro ao criar pedido' })
+async function criarPedidoAdmin(req, res) {
+  if (!req.body.usuarioId) {
+    return res.status(400).json({ mensagem: 'Escolha um cliente para a fatura' })
+  }
+
+  try {
+    const pedido = await criarPedidoParaUsuario(
+      req.body.usuarioId,
+      req.body.itens,
+      req.body.metodoPagamento || 'FIADO',
+    )
+
+    return res.status(201).json(pedido)
+  } catch (error) {
+    return responderErroPedido(error, res)
   }
 }
 
@@ -263,6 +302,7 @@ async function saldoUsuario(req, res) {
 
 module.exports = {
   criarPedido,
+  criarPedidoAdmin,
   listarPedidos,
   buscarPedido,
   pagarPedido,

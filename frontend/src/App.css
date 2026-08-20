@@ -23,6 +23,7 @@
 .cart-panel,
 .invoice-total-card,
 .invoice-client,
+.invoice-add-panel,
 .invoice-detail {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
@@ -370,6 +371,7 @@ button:disabled {
 .product-card,
 .order-card,
 .checkout-panel,
+.invoice-add-panel,
 .invoice-detail {
   padding: 22px;
 }
@@ -382,7 +384,8 @@ button:disabled {
 .form-panel h2,
 .section-title h2,
 .low-stock-list h2,
-.invoice-detail-header h2 {
+.invoice-detail-header h2,
+.invoice-add-panel h3 {
   color: var(--color-text);
   font-size: 1.22rem;
   font-weight: 780;
@@ -682,6 +685,7 @@ tbody tr:hover {
 
 .invoice-list,
 .invoice-detail,
+.invoice-add-panel,
 .orders-list,
 .recent-orders,
 .positive-panel,
@@ -706,6 +710,13 @@ tbody tr:hover {
   background: var(--color-accent-soft);
   border-color: color-mix(in srgb, var(--color-accent) 48%, var(--color-border));
   color: var(--color-accent);
+}
+
+.invoice-add-form {
+  align-items: end;
+  display: grid;
+  gap: 14px;
+  grid-template-columns: minmax(220px, 1fr) minmax(120px, 160px) auto;
 }
 
 .positive-panel h2 {
@@ -825,6 +836,7 @@ tbody tr:hover {
 
   .cart-panel li,
   .payment-options,
+  .invoice-add-form,
   .invoice-layout {
     grid-template-columns: 1fr;
   }

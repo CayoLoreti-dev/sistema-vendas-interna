@@ -1,6 +1,7 @@
 const { Router } = require('express')
 const {
   criarPedido,
+  criarPedidoAdmin,
   listarPedidos,
   buscarPedido,
   pagarPedido,
@@ -12,6 +13,7 @@ const { authMiddleware, adminOnly } = require('../middlewares/auth.middleware')
 const router = Router()
 
 router.post('/', authMiddleware, criarPedido)
+router.post('/admin', authMiddleware, adminOnly, criarPedidoAdmin)
 router.get('/', authMiddleware, listarPedidos)
 router.get('/meu-saldo', authMiddleware, meuSaldo)
 router.get('/saldo/:usuarioId', authMiddleware, adminOnly, saldoUsuario)
