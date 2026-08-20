@@ -4,28 +4,27 @@ const { PrismaClient } = require('@prisma/client')
 const prisma = new PrismaClient()
 
 async function main() {
-  console.log('Limpando banco...')
+  const telefone = '21980100657'
+  const senha = await bcrypt.hash('0501', 10)
 
-  await prisma.$transaction([
-    prisma.itemPedido.deleteMany(),
-    prisma.pushSubscription.deleteMany(),
-    prisma.pedido.deleteMany(),
-    prisma.produto.deleteMany(),
-    prisma.usuario.deleteMany(),
-  ])
-
-  const senha = await bcrypt.hash('123456', 10)
-
-  await prisma.usuario.create({
-    data: {
+  await prisma.usuario.upsert({
+    where: {
+      telefone,
+    },
+    update: {
       nome: 'Admin Master',
-      telefone: '00000000000',
+      senha,
+      papel: 'ADMIN',
+    },
+    create: {
+      nome: 'Admin Master',
+      telefone,
       senha,
       papel: 'ADMIN',
     },
   })
 
-  console.log('Admin Master criado com sucesso!')
+  console.log('Admin Master criado/atualizado com sucesso!')
 }
 
 main()
