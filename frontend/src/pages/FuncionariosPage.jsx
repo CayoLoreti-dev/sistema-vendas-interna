@@ -1,13 +1,16 @@
 import { useEffect, useState } from 'react'
 import { api } from '../services/api'
+import { useAuth } from '../context/AuthContext'
 
 const funcionarioInicial = {
   nome: '',
   telefone: '',
   senha: '',
+  papel: 'FUNCIONARIO',
 }
 
 function FuncionariosPage() {
+  const { usuario } = useAuth()
   const [funcionarios, setFuncionarios] = useState([])
   const [form, setForm] = useState(funcionarioInicial)
   const [carregando, setCarregando] = useState(true)
@@ -57,11 +60,11 @@ function FuncionariosPage() {
         nome: form.nome,
         telefone: form.telefone,
         senha: form.senha,
-        papel: 'FUNCIONARIO',
+        papel: usuario?.papel === 'ADMIN' ? form.papel : 'FUNCIONARIO',
       })
 
       setForm(funcionarioInicial)
-      setMensagem('Funcionario cadastrado com sucesso.')
+      setMensagem('Acesso cadastrado com sucesso.')
       await carregarFuncionarios()
     } catch (error) {
       if (error.message === 'Telefone ja cadastrado') {
@@ -77,12 +80,12 @@ function FuncionariosPage() {
   return (
     <section className="page-stack">
       <div className="page-heading">
-        <p className="eyebrow">Funcionarios</p>
-        <h1>Funcionarios</h1>
+        <p className="eyebrow">Acessos</p>
+        <h1>Clientes e vendedores</h1>
       </div>
 
       <form className="form-panel" onSubmit={cadastrarFuncionario}>
-        <h2>Novo funcionario</h2>
+        <h2>Novo acesso</h2>
 
         <div className="form-grid">
           <label>
@@ -116,10 +119,25 @@ function FuncionariosPage() {
               value={form.senha}
             />
           </label>
+
+          {usuario?.papel === 'ADMIN' && (
+            <label>
+              Tipo de acesso
+              <select
+                onChange={(event) => atualizarCampo('papel', event.target.value)}
+                required
+                value={form.papel}
+              >
+                <option value="FUNCIONARIO">Cliente</option>
+                <option value="VENDEDOR">Vendedor</option>
+                <option value="ADMIN">Master</option>
+              </select>
+            </label>
+          )}
         </div>
 
         <button disabled={salvando} type="submit">
-          {salvando ? 'Salvando...' : 'Cadastrar funcionario'}
+          {salvando ? 'Salvando...' : 'Cadastrar acesso'}
         </button>
       </form>
 
@@ -128,9 +146,9 @@ function FuncionariosPage() {
 
       <div className="table-panel">
         {carregando ? (
-          <p>Carregando funcionarios...</p>
+          <p>Carregando acessos...</p>
         ) : funcionarios.length === 0 ? (
-          <p>Nenhum funcionario cadastrado.</p>
+          <p>Nenhum acesso cadastrado.</p>
         ) : (
           <table>
             <thead>

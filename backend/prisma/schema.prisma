@@ -9,6 +9,7 @@ datasource db {
 
 enum Papel {
   ADMIN
+  VENDEDOR
   FUNCIONARIO
 }
 

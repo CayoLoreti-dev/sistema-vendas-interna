@@ -29,7 +29,16 @@ function adminOnly(req, res, next) {
   return next()
 }
 
+function vendedorOuAdmin(req, res, next) {
+  if (!['ADMIN', 'VENDEDOR'].includes(req.usuario?.papel)) {
+    return res.status(403).json({ mensagem: 'Acesso negado' })
+  }
+
+  return next()
+}
+
 module.exports = {
   authMiddleware,
   adminOnly,
+  vendedorOuAdmin,
 }

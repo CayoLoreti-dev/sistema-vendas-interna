@@ -24,6 +24,7 @@ function AdminLayout() {
   const [verificandoNotificacao, setVerificandoNotificacao] = useState(true)
   const [notificacaoMensagem, setNotificacaoMensagem] = useState('')
   const [ativandoNotificacao, setAtivandoNotificacao] = useState(false)
+  const isMaster = usuario?.papel === 'ADMIN'
 
   useEffect(() => {
     async function conferirSubscription() {
@@ -104,18 +105,19 @@ function AdminLayout() {
       <aside className="admin-sidebar">
         <div className="sidebar-brand">
           <p className="eyebrow brand-name">Vendas Interna</p>
-          <span>Painel administrativo</span>
+          <span>{isMaster ? 'Painel master' : 'Painel do vendedor'}</span>
         </div>
 
         <div className="sidebar-user">
           <span>Usuario</span>
           <strong>{usuario?.nome}</strong>
+          <small>{isMaster ? 'Master' : 'Vendedor'}</small>
         </div>
 
         <nav className="admin-nav sidebar-nav" aria-label="Navegacao administrativa">
-          <NavLink to="/admin" end>Dashboard</NavLink>
+          {isMaster && <NavLink to="/admin" end>Dashboard</NavLink>}
           <NavLink to="/admin/produtos">Produtos</NavLink>
-          <NavLink to="/admin/funcionarios">Funcionarios</NavLink>
+          <NavLink to="/admin/funcionarios">Clientes</NavLink>
           <NavLink to="/admin/pedidos">Pedidos</NavLink>
           <NavLink to="/admin/faturas">Faturas</NavLink>
         </nav>

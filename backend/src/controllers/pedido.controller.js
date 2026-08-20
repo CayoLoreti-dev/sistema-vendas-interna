@@ -214,7 +214,7 @@ async function listarPedidos(req, res) {
     where.status = status
   }
 
-  if (req.usuario.papel !== 'ADMIN') {
+  if (!['ADMIN', 'VENDEDOR'].includes(req.usuario.papel)) {
     where.usuarioId = req.usuario.id
   }
 
@@ -237,7 +237,7 @@ async function buscarPedido(req, res) {
     return res.status(404).json({ mensagem: 'Pedido nao encontrado' })
   }
 
-  if (req.usuario.papel !== 'ADMIN' && pedido.usuarioId !== req.usuario.id) {
+  if (!['ADMIN', 'VENDEDOR'].includes(req.usuario.papel) && pedido.usuarioId !== req.usuario.id) {
     return res.status(403).json({ mensagem: 'Acesso negado' })
   }
 

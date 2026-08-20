@@ -17,7 +17,7 @@ function Login() {
 
     try {
       const auth = await login(telefone, senha)
-      navigate(auth.usuario.papel === 'ADMIN' ? '/admin' : '/funcionario', {
+      navigate(['ADMIN', 'VENDEDOR'].includes(auth.usuario.papel) ? '/admin' : '/funcionario', {
         replace: true,
       })
     } catch {

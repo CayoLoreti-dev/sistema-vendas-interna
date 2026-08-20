@@ -23,7 +23,9 @@ async function enviarNotificacaoAdmins(payload) {
   const subscriptions = await prisma.pushSubscription.findMany({
     where: {
       usuario: {
-        papel: 'ADMIN',
+        papel: {
+          in: ['ADMIN', 'VENDEDOR'],
+        },
       },
     },
   })

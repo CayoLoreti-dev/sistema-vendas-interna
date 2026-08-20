@@ -4,12 +4,12 @@ const {
   criarUsuario,
   listarUsuarios,
 } = require('../controllers/usuario.controller')
-const { authMiddleware, adminOnly } = require('../middlewares/auth.middleware')
+const { authMiddleware, vendedorOuAdmin } = require('../middlewares/auth.middleware')
 
 const router = Router()
 
 router.post('/cadastro', cadastrarFuncionario)
-router.get('/', authMiddleware, adminOnly, listarUsuarios)
-router.post('/', authMiddleware, adminOnly, criarUsuario)
+router.get('/', authMiddleware, vendedorOuAdmin, listarUsuarios)
+router.post('/', authMiddleware, vendedorOuAdmin, criarUsuario)
 
 module.exports = router

@@ -13,6 +13,7 @@ function obterSenha(req) {
 async function criarUsuario(req, res) {
   const { nome, telefone, papel } = req.body
   const senhaInformada = obterSenha(req)
+  const papelSolicitado = papel || 'FUNCIONARIO'
 
   if (!nome || !telefone || !senhaInformada) {
     return res.status(400).json({ mensagem: 'Nome, telefone e senha sao obrigatorios' })
@@ -22,8 +23,12 @@ async function criarUsuario(req, res) {
     return res.status(400).json({ mensagem: 'Telefone deve conter exatamente 11 numeros' })
   }
 
-  if (!['ADMIN', 'FUNCIONARIO'].includes(papel)) {
-    return res.status(400).json({ erro: 'Papel inválido. Use ADMIN ou FUNCIONARIO.' })
+  if (!['ADMIN', 'VENDEDOR', 'FUNCIONARIO'].includes(papelSolicitado)) {
+    return res.status(400).json({ mensagem: 'Papel invalido' })
+  }
+
+  if (req.usuario.papel !== 'ADMIN' && papelSolicitado !== 'FUNCIONARIO') {
+    return res.status(403).json({ mensagem: 'Somente o master pode criar vendedor ou master' })
   }
 
   try {
@@ -34,7 +39,7 @@ async function criarUsuario(req, res) {
         nome,
         telefone,
         senha,
-        papel,
+        papel: papelSolicitado,
       },
     })
 
@@ -83,7 +88,10 @@ async function cadastrarFuncionario(req, res) {
 }
 
 async function listarUsuarios(req, res) {
+  const where = req.usuario.papel === 'ADMIN' ? {} : { papel: 'FUNCIONARIO' }
+
   const usuarios = await prisma.usuario.findMany({
+    where,
     select: {
       id: true,
       nome: true,

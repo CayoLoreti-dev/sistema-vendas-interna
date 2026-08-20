@@ -27,24 +27,35 @@ function HomeRedirect() {
 
   return (
     <Navigate
-      to={usuario.papel === 'ADMIN' ? '/admin' : '/funcionario'}
+      to={['ADMIN', 'VENDEDOR'].includes(usuario.papel) ? '/admin' : '/funcionario'}
       replace
     />
   )
 }
 
-function ProtectedRoute({ papel, children }) {
+function ProtectedRoute({ papeis, papel, children }) {
   const { usuario, carregando } = useAuth()
+  const papeisPermitidos = papeis || [papel]
 
   if (carregando) {
     return null
   }
 
-  if (!usuario || usuario.papel !== papel) {
+  if (!usuario || !papeisPermitidos.includes(usuario.papel)) {
     return <Navigate to="/login" replace />
   }
 
   return children
+}
+
+function AdminIndex() {
+  const { usuario } = useAuth()
+
+  if (usuario?.papel === 'VENDEDOR') {
+    return <Navigate to="/admin/faturas" replace />
+  }
+
+  return <DashboardPage />
 }
 
 function App() {
@@ -59,12 +70,12 @@ function App() {
             <Route
               path="/admin"
               element={(
-                <ProtectedRoute papel="ADMIN">
+                <ProtectedRoute papeis={['ADMIN', 'VENDEDOR']}>
                   <AdminLayout />
                 </ProtectedRoute>
               )}
             >
-              <Route index element={<DashboardPage />} />
+              <Route index element={<AdminIndex />} />
               <Route path="produtos" element={<ProdutosPage />} />
               <Route path="funcionarios" element={<FuncionariosPage />} />
               <Route path="pedidos" element={<PedidosPage />} />
