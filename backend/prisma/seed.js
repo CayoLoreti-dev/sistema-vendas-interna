@@ -4,25 +4,28 @@ const { PrismaClient } = require('@prisma/client')
 const prisma = new PrismaClient()
 
 async function main() {
-  const totalUsuarios = await prisma.usuario.count()
+  console.log('Limpando banco...')
 
-  if (totalUsuarios > 0) {
-    console.log('Seed ignorado: ja existe usuario cadastrado.')
-    return
-  }
+  await prisma.$transaction([
+    prisma.itemPedido.deleteMany(),
+    prisma.pushSubscription.deleteMany(),
+    prisma.pedido.deleteMany(),
+    prisma.produto.deleteMany(),
+    prisma.usuario.deleteMany(),
+  ])
 
   const senha = await bcrypt.hash('123456', 10)
 
   await prisma.usuario.create({
     data: {
-      nome: 'Admin',
+      nome: 'Admin Master',
       telefone: '00000000000',
       senha,
       papel: 'ADMIN',
     },
   })
 
-  console.log('Usuario admin de bootstrap criado.')
+  console.log('Admin Master criado com sucesso!')
 }
 
 main()
