@@ -30,7 +30,7 @@ function HomeRedirect() {
 
   return (
     <Navigate
-      to={['ADMIN', 'VENDEDOR'].includes(usuario.papel) ? '/admin' : '/funcionario'}
+      to={usuario.papel === 'ADMIN' ? '/admin' : usuario.papel === 'VENDEDOR' ? '/vendedor' : '/funcionario'}
       replace
     />
   )
@@ -65,7 +65,22 @@ function App() {
               <Route
                 path="/admin"
                 element={(
-                  <ProtectedRoute papeis={['ADMIN', 'VENDEDOR']}>
+                  <ProtectedRoute papel="ADMIN">
+                    <AdminLayout />
+                  </ProtectedRoute>
+                )}
+              >
+                <Route index element={<DashboardPage />} />
+                <Route path="produtos" element={<ProdutosPage />} />
+                <Route path="funcionarios" element={<FuncionariosPage />} />
+                <Route path="pedidos" element={<PedidosPage />} />
+                <Route path="faturas" element={<FaturasPage />} />
+                <Route path="configuracoes" element={<ConfiguracoesPage />} />
+              </Route>
+              <Route
+                path="/vendedor"
+                element={(
+                  <ProtectedRoute papel="VENDEDOR">
                     <AdminLayout />
                   </ProtectedRoute>
                 )}
