@@ -45,7 +45,7 @@ function DashboardPage() {
       setQuantidadeEmAberto(pedidosEmAberto.length)
       setPedidosRecentes(todosPedidos.slice(0, 5))
     } catch {
-      setErro('Não foi possível carregar o dashboard. Tente novamente em instantes.')
+      setErro('Não foi possível carregar o dashboard. Saia e entre novamente se a sessão estiver antiga.')
     } finally {
       setCarregando(false)
     }

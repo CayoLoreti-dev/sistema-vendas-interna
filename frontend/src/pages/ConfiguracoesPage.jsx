@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import StoreIdentity from '../components/StoreIdentity'
 import { useStoreConfig } from '../context/StoreConfigContext'
 
+const LIMITE_IMAGEM_MB = 1
+
 function ConfiguracoesPage() {
   const { config, salvarConfig } = useStoreConfig()
   const [form, setForm] = useState(config)
@@ -18,6 +20,38 @@ function ConfiguracoesPage() {
       ...atual,
       [campo]: valor,
     }))
+  }
+
+  function carregarArquivo(event) {
+    const arquivo = event.target.files?.[0]
+
+    if (!arquivo) {
+      return
+    }
+
+    if (!arquivo.type.startsWith('image/')) {
+      setErro('Escolha um arquivo de imagem.')
+      return
+    }
+
+    if (arquivo.size > LIMITE_IMAGEM_MB * 1024 * 1024) {
+      setErro(`A imagem precisa ter no máximo ${LIMITE_IMAGEM_MB} MB.`)
+      return
+    }
+
+    const reader = new FileReader()
+
+    reader.onload = () => {
+      atualizarCampo('imagemUrl', reader.result)
+      setErro('')
+      setMensagem('')
+    }
+
+    reader.onerror = () => {
+      setErro('Não foi possível carregar essa imagem.')
+    }
+
+    reader.readAsDataURL(arquivo)
   }
 
   async function salvar(event) {
@@ -68,14 +102,35 @@ function ConfiguracoesPage() {
               onChange={(event) => atualizarCampo('imagemUrl', event.target.value)}
               placeholder="https://..."
               type="url"
-              value={form.imagemUrl || ''}
+              value={form.imagemUrl?.startsWith('data:') ? '' : form.imagemUrl || ''}
+            />
+          </label>
+
+          <label>
+            Enviar foto
+            <input
+              accept="image/png,image/jpeg,image/webp"
+              onChange={carregarArquivo}
+              type="file"
             />
           </label>
         </div>
 
-        <button disabled={salvando} type="submit">
-          {salvando ? 'Salvando...' : 'Salvar configurações'}
-        </button>
+        <div className="actions">
+          {form.imagemUrl && (
+            <button
+              className="secondary-button"
+              onClick={() => atualizarCampo('imagemUrl', '')}
+              type="button"
+            >
+              Remover foto
+            </button>
+          )}
+
+          <button disabled={salvando} type="submit">
+            {salvando ? 'Salvando...' : 'Salvar configurações'}
+          </button>
+        </div>
       </form>
 
       {erro && <p className="error">{erro}</p>}

@@ -32,8 +32,11 @@ async function atualizarConfiguracoes(req, res) {
     return res.status(400).json({ mensagem: 'Informe um nome de loja com ate 40 caracteres' })
   }
 
-  if (imagemUrl && !/^https?:\/\/.+/i.test(imagemUrl)) {
-    return res.status(400).json({ mensagem: 'Informe uma URL de imagem valida' })
+  const imagemValida = /^https?:\/\/.+/i.test(imagemUrl)
+    || /^data:image\/(png|jpe?g|webp);base64,[a-z0-9+/=]+$/i.test(imagemUrl)
+
+  if (imagemUrl && !imagemValida) {
+    return res.status(400).json({ mensagem: 'Informe uma URL ou arquivo de imagem valido' })
   }
 
   await prisma.$transaction([
