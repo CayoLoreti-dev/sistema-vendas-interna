@@ -14,6 +14,7 @@ const app = express()
 const port = process.env.PORT || 3000
 const frontendDist = path.join(__dirname, '../../frontend/dist')
 
+app.set('trust proxy', Number(process.env.TRUST_PROXY || 1))
 app.use(helmet())
 app.use(cors({ origin: process.env.CORS_ORIGIN }))
 app.use(express.json())

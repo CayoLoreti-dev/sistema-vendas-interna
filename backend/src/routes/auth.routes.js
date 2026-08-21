@@ -4,9 +4,9 @@ const { login } = require('../controllers/auth.controller')
 
 const router = Router()
 const loginLimiter = rateLimit({
-	windowMs: 15 * 60 * 1000,
-	limit: 8,
-	message: { erro: 'Muitas tentativas de login. Tente novamente em alguns minutos.' },
+  windowMs: 15 * 60 * 1000,
+  limit: 8,
+  message: { mensagem: 'Muitas tentativas de login. Tente novamente em alguns minutos.' },
 })
 
 router.post('/login', loginLimiter, login)
