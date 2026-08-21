@@ -10,9 +10,9 @@ class PedidoError extends Error {
   }
 }
 
-function válidarEAgruparItens(itens) {
+function validarEAgruparItens(itens) {
   if (!Array.isArray(itens) || itens.length === 0) {
-    throw new PedidoError(400, 'Itens deve ser um array não vazio')
+    throw new PedidoError(400, 'Itens deve ser um array nao vazio')
   }
 
   const itensAgrupados = new Map()
@@ -39,7 +39,7 @@ function pedidoInclude() {
         produto: true,
       },
     },
-    usuário: {
+    usuario: {
       select: {
         id: true,
         nome: true,
@@ -48,9 +48,9 @@ function pedidoInclude() {
   }
 }
 
-function válidarMetodoPagamento(metodoPagamento) {
+function validarMetodoPagamento(metodoPagamento) {
   if (!['FIADO', 'PIX'].includes(metodoPagamento)) {
-    throw new PedidoError(400, 'Escolha uma forma de pagamento válida')
+    throw new PedidoError(400, 'Escolha uma forma de pagamento valida')
   }
 
   return metodoPagamento
@@ -67,18 +67,18 @@ function metodoPagamentoLabel(metodoPagamento) {
   return metodoPagamento === 'PIX' ? 'Aguardando Pix' : 'Fiado'
 }
 
-async function criarPedidoParaUsuario(usuárioId, itensRecebidos, metodoPagamentoRecebido) {
-  const itens = válidarEAgruparItens(itensRecebidos)
-  const metodoPagamento = válidarMetodoPagamento(metodoPagamentoRecebido)
+async function criarPedidoParaUsuario(usuarioId, itensRecebidos, metodoPagamentoRecebido) {
+  const itens = validarEAgruparItens(itensRecebidos)
+  const metodoPagamento = validarMetodoPagamento(metodoPagamentoRecebido)
 
   return prisma.$transaction(async (tx) => {
-    const usuário = await tx.usuário.findUnique({
-      where: { id: usuárioId },
+    const usuario = await tx.usuario.findUnique({
+      where: { id: usuarioId },
       select: { id: true },
     })
 
-    if (!usuário) {
-      throw new PedidoError(404, 'Cliente não encontrado')
+    if (!usuario) {
+      throw new PedidoError(404, 'Cliente nao encontrado')
     }
 
     const produtos = await tx.produto.findMany({
@@ -95,7 +95,7 @@ async function criarPedidoParaUsuario(usuárioId, itensRecebidos, metodoPagament
       const produto = produtosPorId.get(item.produtoId)
 
       if (!produto) {
-        throw new PedidoError(400, `Produto ${item.produtoId} não encontrado`)
+        throw new PedidoError(400, `Produto ${item.produtoId} nao encontrado`)
       }
 
       if (produto.estoqueAtual < item.quantidade) {
@@ -110,7 +110,7 @@ async function criarPedidoParaUsuario(usuárioId, itensRecebidos, metodoPagament
 
     const pedidoCriado = await tx.pedido.create({
       data: {
-        usuárioId,
+        usuarioId,
         status: 'FIADO',
         metodoPagamento,
         valorTotal,
@@ -166,16 +166,16 @@ function responderErroPedido(error, res) {
 async function criarPedido(req, res) {
   try {
     const pedido = await criarPedidoParaUsuario(
-      req.usuário.id,
+      req.usuario.id,
       req.body.itens,
       req.body.metodoPagamento,
     )
 
     enviarNotificacaoAdmins({
       title: 'Novo pedido!',
-      body: `${pedido.usuário.nome} comprou por ${formatarMoeda(pedido.valorTotal)} - ${metodoPagamentoLabel(pedido.metodoPagamento)}`,
+      body: `${pedido.usuario.nome} comprou por ${formatarMoeda(pedido.valorTotal)} - ${metodoPagamentoLabel(pedido.metodoPagamento)}`,
     }).catch((error) => {
-      console.error('Erro ao disparar notificação de novo pedido', error)
+      console.error('Erro ao disparar notificacao de novo pedido', error)
     })
 
     return res.status(201).json(pedido)
@@ -185,13 +185,13 @@ async function criarPedido(req, res) {
 }
 
 async function criarPedidoAdmin(req, res) {
-  if (!req.body.usuárioId) {
+  if (!req.body.usuarioId) {
     return res.status(400).json({ mensagem: 'Escolha um cliente para a fatura' })
   }
 
   try {
     const pedido = await criarPedidoParaUsuario(
-      req.body.usuárioId,
+      req.body.usuarioId,
       req.body.itens,
       req.body.metodoPagamento || 'FIADO',
     )
@@ -208,14 +208,14 @@ async function listarPedidos(req, res) {
 
   if (status) {
     if (!['FIADO', 'PAGO'].includes(status)) {
-      return res.status(400).json({ mensagem: 'Status inválido' })
+      return res.status(400).json({ mensagem: 'Status invalido' })
     }
 
     where.status = status
   }
 
-  if (!['ADMIN', 'VENDEDOR'].includes(req.usuário.papel)) {
-    where.usuárioId = req.usuário.id
+  if (!['ADMIN', 'VENDEDOR'].includes(req.usuario.papel)) {
+    where.usuarioId = req.usuario.id
   }
 
   const pedidos = await prisma.pedido.findMany({
@@ -234,10 +234,10 @@ async function buscarPedido(req, res) {
   })
 
   if (!pedido) {
-    return res.status(404).json({ mensagem: 'Pedido não encontrado' })
+    return res.status(404).json({ mensagem: 'Pedido nao encontrado' })
   }
 
-  if (!['ADMIN', 'VENDEDOR'].includes(req.usuário.papel) && pedido.usuárioId !== req.usuário.id) {
+  if (!['ADMIN', 'VENDEDOR'].includes(req.usuario.papel) && pedido.usuarioId !== req.usuario.id) {
     return res.status(403).json({ mensagem: 'Acesso negado' })
   }
 
@@ -250,11 +250,11 @@ async function pagarPedido(req, res) {
   })
 
   if (!pedido) {
-    return res.status(404).json({ mensagem: 'Pedido não encontrado' })
+    return res.status(404).json({ mensagem: 'Pedido nao encontrado' })
   }
 
   if (pedido.status === 'PAGO') {
-    return res.status(400).json({ mensagem: 'Pedido já está pago' })
+    return res.status(400).json({ mensagem: 'Pedido ja esta pago' })
   }
 
   const pedidoPago = await prisma.pedido.update({
@@ -269,10 +269,10 @@ async function pagarPedido(req, res) {
   return res.json(pedidoPago)
 }
 
-async function saldoPorUsuario(usuárioId) {
+async function saldoPorUsuario(usuarioId) {
   const pedidos = await prisma.pedido.findMany({
     where: {
-      usuárioId,
+      usuarioId,
       status: 'FIADO',
     },
     include: pedidoInclude(),
@@ -291,12 +291,12 @@ async function saldoPorUsuario(usuárioId) {
 }
 
 async function meuSaldo(req, res) {
-  const saldo = await saldoPorUsuario(req.usuário.id)
+  const saldo = await saldoPorUsuario(req.usuario.id)
   return res.json(saldo)
 }
 
 async function saldoUsuario(req, res) {
-  const saldo = await saldoPorUsuario(req.params.usuárioId)
+  const saldo = await saldoPorUsuario(req.params.usuarioId)
   return res.json(saldo)
 }
 

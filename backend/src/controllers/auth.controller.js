@@ -7,7 +7,7 @@ async function login(req, res) {
   const senhaInformada = senha ?? pin
 
   if (!telefone || !senhaInformada) {
-    return res.status(401).json({ mensagem: 'Credenciais invÃ¡lidas' })
+    return res.status(401).json({ mensagem: 'Credenciais invalidas' })
   }
 
   const usuario = await prisma.usuario.findUnique({
@@ -15,13 +15,13 @@ async function login(req, res) {
   })
 
   if (!usuario) {
-    return res.status(401).json({ mensagem: 'Credenciais invÃ¡lidas' })
+    return res.status(401).json({ mensagem: 'Credenciais invalidas' })
   }
 
   const senhaValida = await bcrypt.compare(senhaInformada, usuario.senha)
 
   if (!senhaValida) {
-    return res.status(401).json({ mensagem: 'Credenciais invÃ¡lidas' })
+    return res.status(401).json({ mensagem: 'Credenciais invalidas' })
   }
 
   const token = jwt.sign(

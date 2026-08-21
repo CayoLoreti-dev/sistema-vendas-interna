@@ -5,7 +5,7 @@ function configurarWebPush() {
   const { VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, VAPID_SUBJECT } = process.env
 
   if (!VAPID_PUBLIC_KEY || !VAPID_PRIVATE_KEY || !VAPID_SUBJECT) {
-    console.warn('Push desativado: chaves VAPID não configuradas')
+    console.warn('Push desativado: chaves VAPID nao configuradas')
     return false
   }
 
@@ -43,7 +43,7 @@ async function enviarNotificacaoAdmins(payload) {
         JSON.stringify(payload),
       )
     } catch (error) {
-      console.error('Erro ao enviar notificação push', error)
+      console.error('Erro ao enviar notificacao push', error)
     }
   }))
 }
