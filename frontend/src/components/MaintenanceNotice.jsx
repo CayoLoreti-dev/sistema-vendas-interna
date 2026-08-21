@@ -7,8 +7,8 @@ function MaintenanceNotice() {
 
   return (
     <div className="maintenance-notice" role="status">
-      <strong>Sistema em manutenÃ§Ã£o</strong>
-      <span>Estamos fazendo ajustes agora. VocÃª pode enfrentar lentidÃ£o ou dificuldade de acesso por alguns minutos.</span>
+      <strong>Sistema em manutenção</strong>
+      <span>Estamos fazendo ajustes agora. Você pode enfrentar lentidão ou dificuldade de acesso por alguns minutos.</span>
     </div>
   )
 }

@@ -70,7 +70,7 @@ model ItemPedido {
   produto       Produto @relation(fields: [produtoId], references: [id])
   produtoId     String
   quantidade    Int
-  precoUnitario Decimal @db.Decimal(10, 2) // snapshot do preço no momento da compra
+  precoUnitario Decimal @db.Decimal(10, 2) // snapshot do preco no momento da compra
 
   @@map("itens_pedido")
 }
@@ -85,4 +85,13 @@ model PushSubscription {
   criadoEm  DateTime @default(now())
 
   @@map("push_subscriptions")
+}
+
+model Configuracao {
+  id           String   @id @default(uuid())
+  chave        String   @unique
+  valor        String
+  atualizadoEm DateTime @updatedAt
+
+  @@map("configuracoes")
 }

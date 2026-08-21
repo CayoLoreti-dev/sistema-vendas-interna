@@ -40,6 +40,11 @@
   width: 100%;
 }
 
+.auth-brand {
+  display: grid;
+  gap: 16px;
+}
+
 .auth-link {
   color: var(--color-text-muted);
   margin: 0;
@@ -224,6 +229,57 @@ button:disabled {
   color: var(--color-warning);
 }
 
+.store-identity {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  min-width: 0;
+}
+
+.store-identity.compact {
+  gap: 10px;
+}
+
+.store-photo {
+  align-items: center;
+  background:
+    linear-gradient(145deg, color-mix(in srgb, var(--color-accent) 20%, var(--color-surface)), var(--color-surface-soft));
+  border: 1px solid color-mix(in srgb, var(--color-accent) 34%, var(--color-border));
+  border-radius: 10px;
+  box-shadow: var(--shadow-soft);
+  color: var(--color-accent);
+  display: flex;
+  flex: 0 0 auto;
+  font-size: 1.25rem;
+  font-weight: 850;
+  height: 52px;
+  justify-content: center;
+  overflow: hidden;
+  width: 52px;
+}
+
+.store-photo img {
+  height: 100%;
+  object-fit: cover;
+  width: 100%;
+}
+
+.store-identity .eyebrow {
+  margin: 0;
+}
+
+.store-identity span,
+.sidebar-context {
+  color: var(--color-text-muted);
+  font-size: 0.88rem;
+  font-weight: 650;
+}
+
+.auth-card .store-photo {
+  height: 58px;
+  width: 58px;
+}
+
 .admin-shell,
 .funcionario-shell {
   background:
@@ -237,13 +293,15 @@ button:disabled {
 .admin-sidebar,
 .funcionario-sidebar {
   align-content: start;
-  backdrop-filter: blur(14px);
-  background: color-mix(in srgb, var(--color-surface) 88%, transparent);
+  backdrop-filter: blur(16px);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--color-surface) 94%, var(--color-accent) 6%), var(--color-surface) 46%),
+    var(--color-surface);
   border-right: 1px solid var(--color-border);
   display: grid;
-  gap: 18px;
+  gap: 20px;
   min-height: 100vh;
-  padding: 22px 18px;
+  padding: 24px 18px;
   position: sticky;
   align-self: start;
   top: 0;
@@ -254,11 +312,10 @@ button:disabled {
 .sidebar-brand {
   border-bottom: 1px solid var(--color-border);
   display: grid;
-  gap: 4px;
-  padding-bottom: 18px;
+  gap: 10px;
+  padding-bottom: 20px;
 }
 
-.sidebar-brand span,
 .sidebar-user span {
   color: var(--color-text-muted);
   font-size: 0.88rem;
@@ -266,12 +323,12 @@ button:disabled {
 }
 
 .sidebar-user {
-  background: var(--color-surface-soft);
+  background: color-mix(in srgb, var(--color-surface-soft) 82%, var(--color-surface));
   border: 1px solid var(--color-border);
   border-radius: 8px;
   display: grid;
   gap: 6px;
-  padding: 14px;
+  padding: 16px;
 }
 
 .sidebar-user strong {
@@ -286,12 +343,12 @@ button:disabled {
 
 .admin-nav,
 .funcionario-nav {
-  background: var(--color-surface-soft);
+  background: color-mix(in srgb, var(--color-surface-soft) 76%, var(--color-surface));
   border: 1px solid var(--color-border);
   border-radius: 8px;
   display: grid;
-  gap: 4px;
-  padding: 4px;
+  gap: 6px;
+  padding: 6px;
 }
 
 .sidebar-nav {
@@ -306,7 +363,7 @@ button:disabled {
   display: flex;
   font-weight: 750;
   justify-content: space-between;
-  padding: 9px 12px;
+  padding: 11px 13px;
   position: relative;
   text-decoration: none;
   transition:
@@ -336,6 +393,7 @@ button:disabled {
 .funcionario-nav a:hover {
   background: var(--color-surface);
   border-color: var(--color-border);
+  box-shadow: 0 8px 18px color-mix(in srgb, var(--color-accent) 8%, transparent);
   color: var(--color-accent);
   transform: translateX(3px);
 }
@@ -359,6 +417,7 @@ button:disabled {
   align-self: end;
   border-top: 1px solid var(--color-border);
   display: grid;
+  gap: 10px;
   justify-content: stretch;
   margin-top: auto;
   padding-top: 18px;
@@ -747,6 +806,62 @@ tbody tr:hover {
   gap: 14px;
 }
 
+.recent-orders ul {
+  gap: 0;
+}
+
+.recent-orders li {
+  border-top: 1px solid var(--color-border);
+}
+
+.recent-orders li:first-child {
+  border-top: 0;
+}
+
+.recent-orders a {
+  align-items: center;
+  display: grid;
+  gap: 10px 22px;
+  grid-template-columns: minmax(180px, 1fr) minmax(100px, auto) minmax(92px, auto);
+  padding: 14px 0;
+}
+
+.recent-orders a span,
+.recent-orders a strong,
+.recent-orders a em {
+  display: block;
+}
+
+.recent-orders a strong {
+  font-size: 0.98rem;
+}
+
+.recent-orders a span {
+  color: var(--color-accent);
+  font-family: var(--font-mono);
+  font-weight: 800;
+  justify-self: end;
+}
+
+.recent-orders a em {
+  background: color-mix(in srgb, var(--color-warning) 13%, var(--color-surface));
+  border: 1px solid color-mix(in srgb, var(--color-warning) 34%, var(--color-border));
+  border-radius: 999px;
+  color: var(--color-warning);
+  font-size: 0.86rem;
+  font-style: normal;
+  font-weight: 750;
+  justify-self: end;
+  padding: 5px 9px;
+}
+
+.settings-preview {
+  background: var(--color-surface-soft);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 16px;
+}
+
 .invoice-total-card,
 .invoice-client {
   padding: 16px;
@@ -881,6 +996,13 @@ tbody tr:hover {
   .recent-orders a {
     display: grid;
     gap: 8px;
+    grid-template-columns: 1fr;
+    padding: 13px 0;
+  }
+
+  .recent-orders a span,
+  .recent-orders a em {
+    justify-self: start;
   }
 
   .cart-panel {

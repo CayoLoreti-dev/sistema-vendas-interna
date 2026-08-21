@@ -1,11 +1,13 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
+import { StoreConfigProvider } from './context/StoreConfigContext'
 import { ThemeProvider } from './context/ThemeContext'
 import MaintenanceNotice from './components/MaintenanceNotice'
 import AdminLayout from './layouts/AdminLayout'
 import FuncionarioLayout from './layouts/FuncionarioLayout'
 import CatalogoPage from './pages/CatalogoPage'
 import Cadastro from './pages/Cadastro'
+import ConfiguracoesPage from './pages/ConfiguracoesPage'
 import DashboardPage from './pages/DashboardPage'
 import FaturasPage from './pages/FaturasPage'
 import FuncionariosPage from './pages/FuncionariosPage'
@@ -53,39 +55,42 @@ function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <BrowserRouter>
-          <MaintenanceNotice />
-          <Routes>
-            <Route path="/" element={<HomeRedirect />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/cadastro" element={<Cadastro />} />
-            <Route
-              path="/admin"
-              element={(
-                <ProtectedRoute papeis={['ADMIN', 'VENDEDOR']}>
-                  <AdminLayout />
-                </ProtectedRoute>
-              )}
-            >
-              <Route index element={<DashboardPage />} />
-              <Route path="produtos" element={<ProdutosPage />} />
-              <Route path="funcionarios" element={<FuncionariosPage />} />
-              <Route path="pedidos" element={<PedidosPage />} />
-              <Route path="faturas" element={<FaturasPage />} />
-            </Route>
-            <Route
-              path="/funcionario"
-              element={(
-                <ProtectedRoute papel="FUNCIONARIO">
-                  <FuncionarioLayout />
-                </ProtectedRoute>
-              )}
-            >
-              <Route index element={<CatalogoPage />} />
-              <Route path="saldo" element={<MeuSaldoPage />} />
-            </Route>
-          </Routes>
-        </BrowserRouter>
+        <StoreConfigProvider>
+          <BrowserRouter>
+            <MaintenanceNotice />
+            <Routes>
+              <Route path="/" element={<HomeRedirect />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/cadastro" element={<Cadastro />} />
+              <Route
+                path="/admin"
+                element={(
+                  <ProtectedRoute papeis={['ADMIN', 'VENDEDOR']}>
+                    <AdminLayout />
+                  </ProtectedRoute>
+                )}
+              >
+                <Route index element={<DashboardPage />} />
+                <Route path="produtos" element={<ProdutosPage />} />
+                <Route path="funcionarios" element={<FuncionariosPage />} />
+                <Route path="pedidos" element={<PedidosPage />} />
+                <Route path="faturas" element={<FaturasPage />} />
+                <Route path="configuracoes" element={<ConfiguracoesPage />} />
+              </Route>
+              <Route
+                path="/funcionario"
+                element={(
+                  <ProtectedRoute papel="FUNCIONARIO">
+                    <FuncionarioLayout />
+                  </ProtectedRoute>
+                )}
+              >
+                <Route index element={<CatalogoPage />} />
+                <Route path="saldo" element={<MeuSaldoPage />} />
+              </Route>
+            </Routes>
+          </BrowserRouter>
+        </StoreConfigProvider>
       </AuthProvider>
     </ThemeProvider>
   )

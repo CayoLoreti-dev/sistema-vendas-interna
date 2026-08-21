@@ -9,6 +9,7 @@ const usuarioRoutes = require('./routes/usuario.routes')
 const produtoRoutes = require('./routes/produto.routes')
 const pedidoRoutes = require('./routes/pedido.routes')
 const pushRoutes = require('./routes/push.routes')
+const configRoutes = require('./routes/config.routes')
 
 const app = express()
 const port = process.env.PORT || 3000
@@ -24,10 +25,11 @@ app.use('/usuarios', usuarioRoutes)
 app.use('/produtos', produtoRoutes)
 app.use('/pedidos', pedidoRoutes)
 app.use('/push', pushRoutes)
+app.use('/config', configRoutes)
 
 app.use(express.static(frontendDist))
 app.use((req, res, next) => {
-  const isApiRequest = ['/auth', '/usuarios', '/produtos', '/pedidos', '/push']
+  const isApiRequest = ['/auth', '/usuarios', '/produtos', '/pedidos', '/push', '/config']
     .some((prefix) => req.path === prefix || req.path.startsWith(`${prefix}/`))
 
   if (req.method !== 'GET' || isApiRequest) {

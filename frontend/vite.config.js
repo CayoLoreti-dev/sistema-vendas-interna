@@ -16,8 +16,8 @@ export default defineConfig({
         type: 'module',
       },
       manifest: {
-        name: 'Vendas Interna',
-        short_name: 'Vendas',
+        name: 'VendeMais',
+        short_name: 'VendeMais',
         theme_color: '#1C1815',
         background_color: '#1C1815',
         display: 'standalone',

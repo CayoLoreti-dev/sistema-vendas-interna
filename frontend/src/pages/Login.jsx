@@ -1,10 +1,13 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import StoreIdentity from '../components/StoreIdentity'
 import { useAuth } from '../context/AuthContext'
+import { useStoreConfig } from '../context/StoreConfigContext'
 
 function Login() {
   const navigate = useNavigate()
   const { login } = useAuth()
+  const { config } = useStoreConfig()
   const [telefone, setTelefone] = useState('')
   const [senha, setSenha] = useState('')
   const [erro, setErro] = useState('')
@@ -30,8 +33,8 @@ function Login() {
   return (
     <main className="auth-page">
       <form className="auth-card" onSubmit={handleSubmit}>
-        <div>
-          <p className="eyebrow brand-name">Vendas Interna</p>
+        <div className="auth-brand">
+          <StoreIdentity config={config} />
           <h1>Entrar</h1>
         </div>
 

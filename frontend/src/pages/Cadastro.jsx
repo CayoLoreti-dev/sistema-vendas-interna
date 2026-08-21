@@ -1,11 +1,14 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import StoreIdentity from '../components/StoreIdentity'
 import { useAuth } from '../context/AuthContext'
+import { useStoreConfig } from '../context/StoreConfigContext'
 import { api } from '../services/api'
 
 function Cadastro() {
   const navigate = useNavigate()
   const { login } = useAuth()
+  const { config } = useStoreConfig()
   const [nome, setNome] = useState('')
   const [telefone, setTelefone] = useState('')
   const [senha, setSenha] = useState('')
@@ -46,8 +49,8 @@ function Cadastro() {
   return (
     <main className="auth-page">
       <form className="auth-card" onSubmit={handleSubmit}>
-        <div>
-          <p className="eyebrow brand-name">Vendas Interna</p>
+        <div className="auth-brand">
+          <StoreIdentity config={config} />
           <h1>Criar conta</h1>
         </div>
 

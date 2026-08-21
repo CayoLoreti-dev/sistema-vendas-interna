@@ -1,10 +1,13 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
+import StoreIdentity from '../components/StoreIdentity'
 import ThemeToggle from '../components/ThemeToggle'
 import { useAuth } from '../context/AuthContext'
+import { useStoreConfig } from '../context/StoreConfigContext'
 
 function FuncionarioLayout() {
   const navigate = useNavigate()
   const { usuario, logout } = useAuth()
+  const { config } = useStoreConfig()
 
   function handleLogout() {
     logout()
@@ -15,8 +18,8 @@ function FuncionarioLayout() {
     <div className="funcionario-shell">
       <aside className="funcionario-sidebar">
         <div className="sidebar-brand">
-          <p className="eyebrow brand-name">Vendas Interna</p>
-          <span>Área do funcionário</span>
+          <StoreIdentity config={config} />
+          <span className="sidebar-context">Área do funcionário</span>
         </div>
 
         <div className="sidebar-user">

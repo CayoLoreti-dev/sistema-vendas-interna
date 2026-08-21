@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
+import StoreIdentity from '../components/StoreIdentity'
 import ThemeToggle from '../components/ThemeToggle'
 import { useAuth } from '../context/AuthContext'
+import { useStoreConfig } from '../context/StoreConfigContext'
 import { api } from '../services/api'
 
 function urlBase64ToUint8Array(base64String) {
@@ -20,6 +22,7 @@ function urlBase64ToUint8Array(base64String) {
 function AdminLayout() {
   const navigate = useNavigate()
   const { usuario, logout } = useAuth()
+  const { config } = useStoreConfig()
   const [subscriptionAtiva, setSubscriptionAtiva] = useState(false)
   const [verificandoNotificacao, setVerificandoNotificacao] = useState(true)
   const [notificacaoMensagem, setNotificacaoMensagem] = useState('')
@@ -110,8 +113,8 @@ function AdminLayout() {
     <div className="admin-shell">
       <aside className="admin-sidebar">
         <div className="sidebar-brand">
-          <p className="eyebrow brand-name">Vendas Interna</p>
-          <span>{isMaster ? 'Painel master' : 'Painel do vendedor'}</span>
+          <StoreIdentity config={config} />
+          <span className="sidebar-context">{isMaster ? 'Painel master' : 'Painel do vendedor'}</span>
         </div>
 
         <div className="sidebar-user">
@@ -126,6 +129,7 @@ function AdminLayout() {
           <NavLink to="/admin/funcionarios">Clientes</NavLink>
           <NavLink to="/admin/pedidos">Pedidos</NavLink>
           <NavLink to="/admin/faturas">Faturas</NavLink>
+          <NavLink to="/admin/configuracoes">Configurações</NavLink>
         </nav>
 
         <div className="admin-actions sidebar-actions">
