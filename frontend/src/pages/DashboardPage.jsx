@@ -45,7 +45,7 @@ function DashboardPage() {
       setQuantidadeEmAberto(pedidosEmAberto.length)
       setPedidosRecentes(todosPedidos.slice(0, 5))
     } catch {
-      setErro('Nao foi possivel carregar o dashboard. Tente novamente em instantes.')
+      setErro('Não foi possível carregar o dashboard. Tente novamente em instantes.')
     } finally {
       setCarregando(false)
     }
@@ -80,7 +80,7 @@ function DashboardPage() {
             <section className="summary-card">
               <span>Total em aberto</span>
               <strong className="valor-mono">{moeda.format(totalEmAberto)}</strong>
-              <p>Valor fiado ainda nao pago.</p>
+              <p>Valor fiado ainda não pago.</p>
             </section>
 
             <section className="summary-card">

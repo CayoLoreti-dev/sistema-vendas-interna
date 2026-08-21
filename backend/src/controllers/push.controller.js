@@ -2,7 +2,7 @@ const prisma = require('../lib/prisma')
 
 function vapidPublicKey(req, res) {
   if (!process.env.VAPID_PUBLIC_KEY) {
-    return res.status(503).json({ mensagem: 'Notificacoes ainda nao foram configuradas no servidor' })
+    return res.status(503).json({ mensagem: 'Notificações ainda não foram configuradas no servidor' })
   }
 
   return res.json({ publicKey: process.env.VAPID_PUBLIC_KEY })
@@ -12,18 +12,18 @@ async function subscribe(req, res) {
   const { endpoint, keys } = req.body
 
   if (!endpoint || !keys?.p256dh || !keys?.auth) {
-    return res.status(400).json({ mensagem: 'Inscricao de notificacao invalida' })
+    return res.status(400).json({ mensagem: 'Inscrição de notificação inválida' })
   }
 
   const subscription = await prisma.pushSubscription.upsert({
     where: { endpoint },
     update: {
-      usuarioId: req.usuario.id,
+      usuárioId: req.usuário.id,
       p256dh: keys.p256dh,
       auth: keys.auth,
     },
     create: {
-      usuarioId: req.usuario.id,
+      usuárioId: req.usuário.id,
       endpoint,
       p256dh: keys.p256dh,
       auth: keys.auth,

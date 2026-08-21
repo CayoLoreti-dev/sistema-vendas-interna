@@ -17,7 +17,7 @@ function Cadastro() {
     setErro('')
 
     if (!/^\d{11}$/.test(telefone)) {
-      setErro('Informe um telefone com exatamente 11 numeros.')
+      setErro('Informe um telefone com exatamente 11 números.')
       return
     }
 
@@ -33,10 +33,10 @@ function Cadastro() {
       await login(telefone, senha)
       navigate('/funcionario', { replace: true })
     } catch (error) {
-      if (error.message === 'Telefone ja cadastrado') {
-        setErro('Esse telefone ja esta cadastrado.')
+      if (error.message === 'Telefone já cadastrado') {
+        setErro('Esse telefone já está cadastrado.')
       } else {
-        setErro('Nao foi possivel criar sua conta agora.')
+        setErro('Não foi possível criar sua conta agora.')
       }
     } finally {
       setCarregando(false)
@@ -93,7 +93,7 @@ function Cadastro() {
         </button>
 
         <p className="auth-link">
-          Ja tenho conta. <Link to="/login">Entrar</Link>
+          Já tenho conta. <Link to="/login">Entrar</Link>
         </p>
       </form>
     </main>

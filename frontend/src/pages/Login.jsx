@@ -21,7 +21,7 @@ function Login() {
         replace: true,
       })
     } catch {
-      setErro('Telefone ou senha invalidos')
+      setErro('Telefone ou senha inválidos')
     } finally {
       setCarregando(false)
     }

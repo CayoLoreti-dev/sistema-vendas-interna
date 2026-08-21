@@ -16,16 +16,16 @@ function FuncionarioLayout() {
       <aside className="funcionario-sidebar">
         <div className="sidebar-brand">
           <p className="eyebrow brand-name">Vendas Interna</p>
-          <span>Area do funcionario</span>
+          <span>Área do funcionário</span>
         </div>
 
         <div className="sidebar-user">
-          <span>Usuario</span>
+          <span>Usuário</span>
           <strong>{usuario?.nome}</strong>
         </div>
 
-        <nav className="funcionario-nav sidebar-nav" aria-label="Navegacao do funcionario">
-          <NavLink to="/funcionario" end>Catalogo</NavLink>
+        <nav className="funcionario-nav sidebar-nav" aria-label="Navegação do funcionário">
+          <NavLink to="/funcionario" end>Catálogo</NavLink>
           <NavLink to="/funcionario/saldo">Meu saldo</NavLink>
         </nav>
 

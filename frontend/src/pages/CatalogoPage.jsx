@@ -31,7 +31,7 @@ function CatalogoPage() {
       const dados = await api.get('/produtos')
       setProdutos(dados)
     } catch {
-      setErro('Nao foi possivel carregar os produtos. Tente novamente em instantes.')
+      setErro('Não foi possível carregar os produtos. Tente novamente em instantes.')
     } finally {
       setCarregando(false)
     }
@@ -112,12 +112,12 @@ function CatalogoPage() {
       await carregarProdutos()
 
       if (metodoPagamento === 'FIADO') {
-        setConfirmacao('Pedido registrado! Vai ficar no fiado ate voce acertar com a vendedora.')
+        setConfirmacao('Pedido registrado! Vai ficar no fiado até você acertar com a vendedora.')
       } else {
-        setConfirmacao('Pedido registrado! Combine o Pix com a vendedora - em breve o pagamento por Pix vai ficar automatico aqui direto no app.')
+        setConfirmacao('Pedido registrado! Combine o Pix com a vendedora - em breve o pagamento por Pix vai ficar automático aqui direto no app.')
       }
     } catch (error) {
-      setErro(error.message || 'Nao foi possivel registrar o pedido. Confira os itens e tente de novo.')
+      setErro(error.message || 'Não foi possível registrar o pedido. Confira os itens e tente de novo.')
     } finally {
       setEnviando(false)
     }
@@ -126,7 +126,7 @@ function CatalogoPage() {
   return (
     <section className="page-stack catalog-page">
       <div className="page-heading">
-        <p className="eyebrow">Catalogo</p>
+        <p className="eyebrow">Catálogo</p>
         <h1>Escolha seus produtos</h1>
       </div>
 
@@ -139,7 +139,7 @@ function CatalogoPage() {
         </div>
       ) : produtos.length === 0 ? (
         <div className="page-panel">
-          <p className="muted">Nenhum produto disponivel no momento.</p>
+          <p className="muted">Nenhum produto disponível no momento.</p>
         </div>
       ) : (
         <div className="catalog-grid">
@@ -152,7 +152,7 @@ function CatalogoPage() {
                   <span>{produto.categoria || 'Produto'}</span>
                   <h2>{produto.nome}</h2>
                   <strong className="valor-mono">{moeda.format(Number(produto.preco))}</strong>
-                  <p>{semEstoque ? 'Sem estoque no momento' : <><span className="valor-mono">{produto.estoqueAtual}</span> disponivel</>}</p>
+                  <p>{semEstoque ? 'Sem estoque no momento' : <><span className="valor-mono">{produto.estoqueAtual}</span> disponível</>}</p>
                 </div>
 
                 {!semEstoque && (
@@ -248,18 +248,22 @@ function CatalogoPage() {
 
             <div className="payment-options">
               <button
+                className="payment-option"
                 disabled={enviando}
                 onClick={() => finalizarPedido('FIADO')}
                 type="button"
               >
-                Deixar fiado
+                <strong>Comprar fiado</strong>
+                <span>Você paga depois diretamente com a vendedora.</span>
               </button>
               <button
+                className="payment-option"
                 disabled={enviando}
                 onClick={() => finalizarPedido('PIX')}
                 type="button"
               >
-                Pagar com Pix
+                <strong>Pagar com Pix</strong>
+                <span>Combine o pagamento com a vendedora.</span>
               </button>
             </div>
           </section>

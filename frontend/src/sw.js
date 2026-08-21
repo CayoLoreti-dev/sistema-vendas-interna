@@ -5,7 +5,7 @@ precacheAndRoute(self.__WB_MANIFEST)
 self.addEventListener('push', (event) => {
   const payload = event.data?.json() || {}
   const title = payload.title || 'Novo aviso'
-  const body = payload.body || 'Voce tem uma nova notificacao.'
+  const body = payload.body || 'Você tem uma nova notificação.'
 
   event.waitUntil(
     self.registration.showNotification(title, {

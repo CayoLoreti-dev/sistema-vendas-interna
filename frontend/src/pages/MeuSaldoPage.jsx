@@ -8,7 +8,7 @@ const moeda = new Intl.NumberFormat('pt-BR', {
 
 function formatarData(data) {
   return new Date(data).toLocaleString('pt-BR', {
-    dateStyle: 'short',
+    datéStyle: 'short',
     timeStyle: 'short',
   })
 }
@@ -30,7 +30,7 @@ function MeuSaldoPage() {
       const dados = await api.get('/pedidos/meu-saldo')
       setSaldo(dados)
     } catch {
-      setErro('Nao foi possivel carregar seu saldo. Tente novamente em instantes.')
+      setErro('Não foi possível carregar seu saldo. Tente novamente em instantes.')
     } finally {
       setCarregando(false)
     }
@@ -62,8 +62,8 @@ function MeuSaldoPage() {
 
           {saldo.pedidos.length === 0 ? (
             <div className="page-panel positive-panel">
-              <h2>Voce esta em dia!</h2>
-              <p>Nao tem nenhum pedido em aberto agora.</p>
+              <h2>Você está em dia!</h2>
+              <p>Não tem nenhum pedido em aberto agora.</p>
             </div>
           ) : (
             <div className="orders-list">

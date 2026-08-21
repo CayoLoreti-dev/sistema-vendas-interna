@@ -26,7 +26,7 @@ function FuncionariosPage() {
       const dados = await api.get('/usuarios')
       setFuncionarios(dados)
     } catch {
-      setErro('Nao foi possivel carregar os funcionarios.')
+      setErro('Não foi possível carregar os funcionários.')
     } finally {
       setCarregando(false)
     }
@@ -49,7 +49,7 @@ function FuncionariosPage() {
     setMensagem('')
 
     if (!/^\d{11}$/.test(form.telefone)) {
-      setErro('O telefone deve ter exatamente 11 numeros.')
+      setErro('O telefone deve ter exatamente 11 números.')
       return
     }
 
@@ -67,10 +67,10 @@ function FuncionariosPage() {
       setMensagem('Acesso cadastrado com sucesso.')
       await carregarFuncionarios()
     } catch (error) {
-      if (error.message === 'Telefone ja cadastrado') {
-        setErro('Esse telefone ja esta cadastrado.')
+      if (error.message === 'Telefone já cadastrado') {
+        setErro('Esse telefone já está cadastrado.')
       } else {
-        setErro('Nao foi possivel cadastrar o funcionario.')
+        setErro('Não foi possível cadastrar o funcionario.')
       }
     } finally {
       setSalvando(false)

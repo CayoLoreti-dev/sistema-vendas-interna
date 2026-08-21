@@ -60,7 +60,7 @@ function AdminLayout() {
     setNotificacaoMensagem('')
 
     if (!('Notification' in window) || !('serviceWorker' in navigator) || !('PushManager' in window)) {
-      setNotificacaoMensagem('Este navegador nao permite notificacoes push.')
+      setNotificacaoMensagem('Este navegador não permite notificações push.')
       return
     }
 
@@ -70,7 +70,7 @@ function AdminLayout() {
       const permissao = await Notification.requestPermission()
 
       if (permissao !== 'granted') {
-        setNotificacaoMensagem('Permissao negada. As notificacoes nao foram ativadas.')
+        setNotificacaoMensagem('Permissão negada. As notificações não foram ativadas.')
         return
       }
 
@@ -80,14 +80,14 @@ function AdminLayout() {
       if (subscriptionExistente) {
         await api.post('/push/subscribe', subscriptionExistente.toJSON())
         setSubscriptionAtiva(true)
-        setNotificacaoMensagem('Notificacoes ativadas neste aparelho.')
+        setNotificacaoMensagem('Notificações ativadas neste aparelho.')
         return
       }
 
       const { publicKey } = await api.get('/push/vapid-public-key')
 
       if (!publicKey) {
-        setNotificacaoMensagem('Notificacoes ainda nao foram configuradas no servidor.')
+        setNotificacaoMensagem('Notificações ainda não foram configuradas no servidor.')
         return
       }
 
@@ -98,9 +98,9 @@ function AdminLayout() {
 
       await api.post('/push/subscribe', subscription.toJSON())
       setSubscriptionAtiva(true)
-      setNotificacaoMensagem('Notificacoes ativadas neste aparelho.')
+      setNotificacaoMensagem('Notificações ativadas neste aparelho.')
     } catch (error) {
-      setNotificacaoMensagem(error.message || 'Nao foi possivel ativar as notificacoes agora.')
+      setNotificacaoMensagem(error.message || 'Não foi possível ativar as notificações agora.')
     } finally {
       setAtivandoNotificacao(false)
     }
@@ -115,12 +115,12 @@ function AdminLayout() {
         </div>
 
         <div className="sidebar-user">
-          <span>Usuario</span>
+          <span>Usuário</span>
           <strong>{usuario?.nome}</strong>
           <small>{isMaster ? 'Master' : 'Vendedor'}</small>
         </div>
 
-        <nav className="admin-nav sidebar-nav" aria-label="Navegacao administrativa">
+        <nav className="admin-nav sidebar-nav" aria-label="Navegação administrativa">
           <NavLink to="/admin" end>Dashboard</NavLink>
           <NavLink to="/admin/produtos">Produtos</NavLink>
           <NavLink to="/admin/funcionarios">Clientes</NavLink>
@@ -136,7 +136,7 @@ function AdminLayout() {
               onClick={ativarNotificacoes}
               type="button"
             >
-              {ativandoNotificacao ? 'Ativando...' : 'Ativar notificacoes'}
+              {ativandoNotificacao ? 'Ativando...' : 'Ativar notificações'}
             </button>
           )}
           <button type="button" onClick={handleLogout}>Sair</button>

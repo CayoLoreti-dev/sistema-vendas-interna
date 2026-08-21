@@ -30,7 +30,7 @@ function ProdutosPage() {
       const dados = await api.get('/produtos')
       setProdutos(dados)
     } catch {
-      setErro('Nao foi possivel carregar os produtos.')
+      setErro('Não foi possível carregar os produtos.')
     } finally {
       setCarregando(false)
     }
@@ -87,7 +87,7 @@ function ProdutosPage() {
       limparFormulario()
       await carregarProdutos()
     } catch {
-      setErro('Nao foi possivel salvar o produto.')
+      setErro('Não foi possível salvar o produto.')
     } finally {
       setSalvando(false)
     }
@@ -105,10 +105,10 @@ function ProdutosPage() {
 
     try {
       await api.delete(`/produtos/${produto.id}`)
-      setMensagem('Produto excluido com sucesso.')
+      setMensagem('Produto excluído com sucesso.')
       await carregarProdutos()
     } catch {
-      setErro('Nao foi possivel excluir o produto.')
+      setErro('Não foi possível excluir o produto.')
     }
   }
 
@@ -134,7 +134,7 @@ function ProdutosPage() {
           </label>
 
           <label>
-            Categoria
+            Catégoria
             <input
               onChange={(event) => atualizarCampo('categoria', event.target.value)}
               type="text"
@@ -143,7 +143,7 @@ function ProdutosPage() {
           </label>
 
           <label>
-            Preco
+            Preço
             <input
               className="valor-mono"
               min="0"
@@ -194,8 +194,8 @@ function ProdutosPage() {
             <thead>
               <tr>
                 <th>Nome</th>
-                <th>Categoria</th>
-                <th>Preco</th>
+                <th>Catégoria</th>
+                <th>Preço</th>
                 <th>Estoque</th>
                 <th>Acoes</th>
               </tr>

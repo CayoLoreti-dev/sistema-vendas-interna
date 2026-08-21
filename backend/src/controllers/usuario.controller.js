@@ -1,9 +1,9 @@
 const bcrypt = require('bcryptjs')
 const prisma = require('../lib/prisma')
 
-function removerSenha(usuario) {
-  const { senha, ...usuarioSemSenha } = usuario
-  return usuarioSemSenha
+function removerSenha(usuário) {
+  const { senha, ...usuárioSemSenha } = usuário
+  return usuárioSemSenha
 }
 
 function obterSenha(req) {
@@ -16,25 +16,25 @@ async function criarUsuario(req, res) {
   const papelSolicitado = papel || 'FUNCIONARIO'
 
   if (!nome || !telefone || !senhaInformada) {
-    return res.status(400).json({ mensagem: 'Nome, telefone e senha sao obrigatorios' })
+    return res.status(400).json({ mensagem: 'Nome, telefone e senha são obrigatórios' })
   }
 
   if (!/^\d{11}$/.test(telefone)) {
-    return res.status(400).json({ mensagem: 'Telefone deve conter exatamente 11 numeros' })
+    return res.status(400).json({ mensagem: 'Telefone deve conter exatamente 11 números' })
   }
 
   if (!['ADMIN', 'VENDEDOR', 'FUNCIONARIO'].includes(papelSolicitado)) {
-    return res.status(400).json({ mensagem: 'Papel invalido' })
+    return res.status(400).json({ mensagem: 'Papel inválido' })
   }
 
-  if (req.usuario.papel !== 'ADMIN' && papelSolicitado !== 'FUNCIONARIO') {
+  if (req.usuário.papel !== 'ADMIN' && papelSolicitado !== 'FUNCIONARIO') {
     return res.status(403).json({ mensagem: 'Somente o master pode criar vendedor ou master' })
   }
 
   try {
     const senha = await bcrypt.hash(senhaInformada, 10)
 
-    const usuario = await prisma.usuario.create({
+    const usuário = await prisma.usuário.create({
       data: {
         nome,
         telefone,
@@ -43,13 +43,13 @@ async function criarUsuario(req, res) {
       },
     })
 
-    return res.status(201).json(removerSenha(usuario))
+    return res.status(201).json(removerSenha(usuário))
   } catch (error) {
     if (error.code === 'P2002') {
-      return res.status(409).json({ mensagem: 'Telefone ja cadastrado' })
+      return res.status(409).json({ mensagem: 'Telefone já cadastrado' })
     }
 
-    return res.status(500).json({ mensagem: 'Erro ao criar usuario' })
+    return res.status(500).json({ mensagem: 'Erro ao criar usuário' })
   }
 }
 
@@ -58,17 +58,17 @@ async function cadastrarFuncionario(req, res) {
   const senhaInformada = obterSenha(req)
 
   if (!nome || !telefone || !senhaInformada) {
-    return res.status(400).json({ mensagem: 'Nome, telefone e senha sao obrigatorios' })
+    return res.status(400).json({ mensagem: 'Nome, telefone e senha são obrigatórios' })
   }
 
   if (!/^\d{11}$/.test(telefone)) {
-    return res.status(400).json({ mensagem: 'Telefone deve conter exatamente 11 numeros' })
+    return res.status(400).json({ mensagem: 'Telefone deve conter exatamente 11 números' })
   }
 
   try {
     const senha = await bcrypt.hash(senhaInformada, 10)
 
-    const usuario = await prisma.usuario.create({
+    const usuário = await prisma.usuário.create({
       data: {
         nome,
         telefone,
@@ -77,20 +77,20 @@ async function cadastrarFuncionario(req, res) {
       },
     })
 
-    return res.status(201).json(removerSenha(usuario))
+    return res.status(201).json(removerSenha(usuário))
   } catch (error) {
     if (error.code === 'P2002') {
-      return res.status(409).json({ mensagem: 'Telefone ja cadastrado' })
+      return res.status(409).json({ mensagem: 'Telefone já cadastrado' })
     }
 
-    return res.status(500).json({ mensagem: 'Erro ao criar usuario' })
+    return res.status(500).json({ mensagem: 'Erro ao criar usuário' })
   }
 }
 
 async function listarUsuarios(req, res) {
-  const where = req.usuario.papel === 'ADMIN' ? {} : { papel: 'FUNCIONARIO' }
+  const where = req.usuário.papel === 'ADMIN' ? {} : { papel: 'FUNCIONARIO' }
 
-  const usuarios = await prisma.usuario.findMany({
+  const usuários = await prisma.usuário.findMany({
     where,
     select: {
       id: true,
@@ -104,7 +104,7 @@ async function listarUsuarios(req, res) {
     },
   })
 
-  return res.json(usuarios)
+  return res.json(usuários)
 }
 
 module.exports = {

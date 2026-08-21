@@ -205,6 +205,25 @@ button:disabled {
   color: var(--color-success);
 }
 
+.maintenance-notice {
+  align-items: center;
+  background: color-mix(in srgb, var(--color-warning) 18%, var(--color-surface));
+  border-bottom: 1px solid color-mix(in srgb, var(--color-warning) 50%, var(--color-border));
+  color: var(--color-text);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  justify-content: center;
+  padding: 10px 18px;
+  position: sticky;
+  top: 0;
+  z-index: 40;
+}
+
+.maintenance-notice strong {
+  color: var(--color-warning);
+}
+
 .admin-shell,
 .funcionario-shell {
   background:
@@ -693,7 +712,21 @@ tbody tr:hover {
 }
 
 .payment-options button {
-  min-height: 64px;
+  min-height: 76px;
+}
+
+.payment-option {
+  align-items: flex-start;
+  display: grid;
+  gap: 5px;
+  justify-items: start;
+  text-align: left;
+}
+
+.payment-option span {
+  font-size: 0.9rem;
+  font-weight: 600;
+  opacity: 0.88;
 }
 
 .invoice-layout {

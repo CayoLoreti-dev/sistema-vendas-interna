@@ -14,7 +14,7 @@ const moeda = new Intl.NumberFormat('pt-BR', {
 
 function formatarData(data) {
   return new Date(data).toLocaleString('pt-BR', {
-    dateStyle: 'short',
+    datéStyle: 'short',
     timeStyle: 'short',
   })
 }
@@ -44,7 +44,7 @@ function PedidosPage() {
       const dados = await api.get(`/pedidos${query}`)
       setPedidos(dados)
     } catch {
-      setErro('Nao foi possivel carregar os pedidos. Tente novamente em instantes.')
+      setErro('Não foi possível carregar os pedidos. Tente novamente em instantes.')
     } finally {
       setCarregando(false)
     }
@@ -70,7 +70,7 @@ function PedidosPage() {
       setMensagem('Pedido marcado como pago.')
       await carregarPedidos(status)
     } catch {
-      setErro('Nao foi possivel marcar esse pedido como pago.')
+      setErro('Não foi possível marcar esse pedido como pago.')
     } finally {
       setPagandoId(null)
     }

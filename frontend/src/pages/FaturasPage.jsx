@@ -8,7 +8,7 @@ const moeda = new Intl.NumberFormat('pt-BR', {
 
 function formatarData(data) {
   return new Date(data).toLocaleString('pt-BR', {
-    dateStyle: 'short',
+    datéStyle: 'short',
     timeStyle: 'short',
   })
 }
@@ -82,7 +82,7 @@ function FaturasPage() {
         return produtosCarregados.find((produto) => produto.estoqueAtual > 0)?.id || ''
       })
     } catch {
-      setErro('Nao foi possivel carregar as faturas. Tente novamente em instantes.')
+      setErro('Não foi possível carregar as faturas. Tente novamente em instantes.')
     } finally {
       setCarregando(false)
     }
@@ -108,7 +108,7 @@ function FaturasPage() {
       setMensagem('Pedido marcado como pago.')
       await carregarFaturas()
     } catch {
-      setErro('Nao foi possivel marcar esse pedido como pago.')
+      setErro('Não foi possível marcar esse pedido como pago.')
     } finally {
       setPagandoId(null)
     }
@@ -136,7 +136,7 @@ function FaturasPage() {
       setMensagem('Fatura marcada como paga.')
       await carregarFaturas()
     } catch {
-      setErro('Nao foi possivel fechar a fatura inteira. Confira os pedidos e tente novamente.')
+      setErro('Não foi possível fechar a fatura inteira. Confira os pedidos e tente novamente.')
     } finally {
       setPagandoId(null)
     }
@@ -153,7 +153,7 @@ function FaturasPage() {
     }
 
     if (!Number.isInteger(quantidadeNumerica) || quantidadeNumerica <= 0) {
-      setErro('Informe uma quantidade valida.')
+      setErro('Informe uma quantidade válida.')
       return
     }
 
@@ -182,7 +182,7 @@ function FaturasPage() {
       setQuantidade('1')
       await carregarFaturas()
     } catch (error) {
-      setErro(error?.mensagem || 'Nao foi possivel adicionar o produto na fatura.')
+      setErro(error?.mensagem || 'Não foi possível adicionar o produto na fatura.')
     } finally {
       setAdicionandoProduto(false)
     }
@@ -204,8 +204,8 @@ function FaturasPage() {
         </div>
       ) : faturas.length === 0 ? (
         <div className="page-panel positive-panel">
-          <h2>Nenhum funcionario cadastrado</h2>
-          <p>Cadastre um funcionario antes de lancar produtos em uma fatura.</p>
+          <h2>Nenhum funcionário cadastrado</h2>
+          <p>Cadastre um funcionário antes de lançar produtos em uma fatura.</p>
         </div>
       ) : (
         <div className="invoice-layout">
@@ -251,7 +251,7 @@ function FaturasPage() {
 
               <form className="invoice-add-panel" onSubmit={adicionarProdutoNaFatura}>
                 <div>
-                  <p className="eyebrow">Lancamento manual</p>
+                  <p className="eyebrow">Lançamento manual</p>
                   <h3>Adicionar produto na fatura</h3>
                   <p className="muted">Use quando a vendedora entregar um produto direto para o cliente.</p>
                 </div>
@@ -295,7 +295,7 @@ function FaturasPage() {
               {faturaSelecionada.pedidos.length === 0 ? (
                 <div className="page-panel positive-panel">
                   <h2>Cliente em dia</h2>
-                  <p>Essa fatura ainda nao tem pedidos em aberto.</p>
+                  <p>Essa fatura ainda não tem pedidos em aberto.</p>
                 </div>
               ) : (
                 <div className="orders-list">

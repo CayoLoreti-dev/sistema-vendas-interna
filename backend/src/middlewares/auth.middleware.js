@@ -4,7 +4,7 @@ function authMiddleware(req, res, next) {
   const authHeader = req.headers.authorization
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return res.status(401).json({ mensagem: 'Nao autorizado' })
+    return res.status(401).json({ mensagem: 'Não autorizado' })
   }
 
   const token = authHeader.split(' ')[1]
@@ -17,7 +17,7 @@ function authMiddleware(req, res, next) {
     }
     return next()
   } catch {
-    return res.status(401).json({ mensagem: 'Nao autorizado' })
+    return res.status(401).json({ mensagem: 'Não autorizado' })
   }
 }
 

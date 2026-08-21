@@ -12,7 +12,7 @@ async function criarProduto(req, res) {
   const { nome, categoria, preco, estoqueAtual } = req.body
 
   if (!nome || preco === undefined) {
-    return res.status(400).json({ mensagem: 'Nome e preco sao obrigatorios' })
+    return res.status(400).json({ mensagem: 'Nome e preço são obrigatórios' })
   }
 
   try {
@@ -49,7 +49,7 @@ async function atualizarProduto(req, res) {
     return res.json(produto)
   } catch (error) {
     if (error.code === 'P2025') {
-      return res.status(404).json({ mensagem: 'Produto nao encontrado' })
+      return res.status(404).json({ mensagem: 'Produto não encontrado' })
     }
 
     return res.status(500).json({ mensagem: 'Erro ao atualizar produto' })
@@ -67,7 +67,7 @@ async function deletarProduto(req, res) {
     return res.status(204).send()
   } catch (error) {
     if (error.code === 'P2025') {
-      return res.status(404).json({ mensagem: 'Produto nao encontrado' })
+      return res.status(404).json({ mensagem: 'Produto não encontrado' })
     }
 
     return res.status(500).json({ mensagem: 'Erro ao deletar produto' })

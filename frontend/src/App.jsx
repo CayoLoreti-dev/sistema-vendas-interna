@@ -1,6 +1,7 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { ThemeProvider } from './context/ThemeContext'
+import MaintenanceNotice from './components/MaintenanceNotice'
 import AdminLayout from './layouts/AdminLayout'
 import FuncionarioLayout from './layouts/FuncionarioLayout'
 import CatalogoPage from './pages/CatalogoPage'
@@ -53,6 +54,7 @@ function App() {
     <ThemeProvider>
       <AuthProvider>
         <BrowserRouter>
+          <MaintenanceNotice />
           <Routes>
             <Route path="/" element={<HomeRedirect />} />
             <Route path="/login" element={<Login />} />
