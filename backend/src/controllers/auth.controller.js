@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken')
 const prisma = require('../lib/prisma')
 
 async function login(req, res) {
-  const { telefone, pin, senha } = req.body
+  const { telefone, pin, senha } = req.body || {}
   const senhaInformada = senha ?? pin
 
   if (!telefone || !senhaInformada) {

@@ -24,6 +24,7 @@ app.use('/auth', authRoutes)
 app.use('/usuarios', usuarioRoutes)
 app.use('/produtos', produtoRoutes)
 app.use('/pedidos', pedidoRoutes)
+app.use('/push/config', configRoutes)
 app.use('/push', pushRoutes)
 app.use('/config', configRoutes)
 

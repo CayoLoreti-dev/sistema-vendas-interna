@@ -16,7 +16,7 @@ export function StoreConfigProvider({ children }) {
     setCarregandoConfig(true)
 
     try {
-      const dados = await api.get('/config')
+      const dados = await api.get('/push/config')
       setConfig({
         nomeLoja: dados.nomeLoja || defaultConfig.nomeLoja,
         imagemUrl: dados.imagemUrl || '',
@@ -29,7 +29,7 @@ export function StoreConfigProvider({ children }) {
   }
 
   async function salvarConfig(payload) {
-    const dados = await api.put('/config', payload)
+    const dados = await api.put('/push/config', payload)
     setConfig({
       nomeLoja: dados.nomeLoja || defaultConfig.nomeLoja,
       imagemUrl: dados.imagemUrl || '',
