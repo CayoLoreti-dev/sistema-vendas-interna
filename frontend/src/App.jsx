@@ -9,6 +9,7 @@ import CatalogoPage from './pages/CatalogoPage'
 import Cadastro from './pages/Cadastro'
 import ConfiguracoesPage from './pages/ConfiguracoesPage'
 import DashboardPage from './pages/DashboardPage'
+import EstoqueInternoPage from './pages/EstoqueInternoPage'
 import FaturasPage from './pages/FaturasPage'
 import FuncionariosPage from './pages/FuncionariosPage'
 import Login from './pages/Login'
@@ -72,6 +73,7 @@ function App() {
               >
                 <Route index element={<DashboardPage />} />
                 <Route path="produtos" element={<ProdutosPage />} />
+                <Route path="estoque" element={<EstoqueInternoPage />} />
                 <Route path="funcionarios" element={<FuncionariosPage />} />
                 <Route path="pedidos" element={<PedidosPage />} />
                 <Route path="faturas" element={<FaturasPage />} />
@@ -87,6 +89,7 @@ function App() {
               >
                 <Route index element={<DashboardPage />} />
                 <Route path="produtos" element={<ProdutosPage />} />
+                <Route path="estoque" element={<EstoqueInternoPage />} />
                 <Route path="funcionarios" element={<FuncionariosPage />} />
                 <Route path="pedidos" element={<PedidosPage />} />
                 <Route path="faturas" element={<FaturasPage />} />

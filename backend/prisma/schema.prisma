@@ -23,28 +23,39 @@ enum MetodoPagamento {
   PIX
 }
 
+enum TipoMovimentacaoEstoque {
+  ENTRADA
+  COLOCOU_PRA_VENDA
+}
+
 model Usuario {
-  id                String             @id @default(uuid())
-  nome              String
-  telefone          String             @unique
-  senha             String             // hash do PIN
-  papel             Papel              @default(FUNCIONARIO)
-  criadoEm          DateTime           @default(now())
-  pedidos           Pedido[]
-  pushSubscriptions PushSubscription[]
+  id                   String                @id @default(uuid())
+  nome                 String
+  telefone             String                @unique
+  senha                String // hash do PIN
+  papel                Papel                 @default(FUNCIONARIO)
+  criadoEm             DateTime              @default(now())
+  pedidos              Pedido[]
+  pushSubscriptions    PushSubscription[]
+  estoquesInternos     EstoqueInterno[]
+  movimentacoesEstoque MovimentacaoEstoque[]
 
   @@map("usuarios")
 }
 
 model Produto {
-  id           String   @id @default(uuid())
-  nome         String
-  categoria    String?
-  preco        Decimal  @db.Decimal(10, 2)
-  estoqueAtual Int      @default(0)
-  criadoEm     DateTime @default(now())
-  atualizadoEm DateTime @updatedAt
-  itensPedido  ItemPedido[]
+  id                   String                @id @default(uuid())
+  nome                 String
+  categoria            String?
+  preco                Decimal               @db.Decimal(10, 2)
+  precoPromocional     Decimal?              @db.Decimal(10, 2)
+  promocaoAtiva        Boolean               @default(false)
+  estoqueAtual         Int                   @default(0)
+  criadoEm             DateTime              @default(now())
+  atualizadoEm         DateTime              @updatedAt
+  itensPedido          ItemPedido[]
+  estoquesInternos     EstoqueInterno[]
+  movimentacoesEstoque MovimentacaoEstoque[]
 
   @@map("produtos")
 }
@@ -94,4 +105,34 @@ model Configuracao {
   atualizadoEm DateTime @updatedAt
 
   @@map("configuracoes")
+}
+
+model EstoqueInterno {
+  id            String                @id @default(uuid())
+  vendedor      Usuario               @relation(fields: [vendedorId], references: [id])
+  vendedorId    String
+  produto       Produto               @relation(fields: [produtoId], references: [id])
+  produtoId     String
+  quantidade    Int                   @default(0)
+  criadoEm      DateTime              @default(now())
+  atualizadoEm  DateTime              @updatedAt
+  movimentacoes MovimentacaoEstoque[]
+
+  @@unique([vendedorId, produtoId])
+  @@map("estoques_internos")
+}
+
+model MovimentacaoEstoque {
+  id         String                  @id @default(uuid())
+  estoque    EstoqueInterno          @relation(fields: [estoqueId], references: [id])
+  estoqueId  String
+  vendedor   Usuario                 @relation(fields: [vendedorId], references: [id])
+  vendedorId String
+  produto    Produto                 @relation(fields: [produtoId], references: [id])
+  produtoId  String
+  tipo       TipoMovimentacaoEstoque
+  quantidade Int
+  criadoEm   DateTime                @default(now())
+
+  @@map("movimentacoes_estoque")
 }

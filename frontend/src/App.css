@@ -656,11 +656,99 @@ tbody tr:hover {
 .product-card {
   display: grid;
   gap: 16px;
+  overflow: hidden;
+  position: relative;
 }
 
 .product-card.disabled {
   background: color-mix(in srgb, var(--color-surface-soft) 65%, var(--color-surface));
   opacity: 0.72;
+}
+
+.product-card.promo-card {
+  border-color: color-mix(in srgb, var(--color-warning) 64%, var(--color-border));
+  box-shadow:
+    var(--shadow-soft),
+    0 0 0 4px color-mix(in srgb, var(--color-warning) 10%, transparent);
+  animation: promo-pulse 1.8s ease-in-out infinite;
+}
+
+.promo-ribbon {
+  background: var(--color-warning);
+  border-radius: 0 0 0 8px;
+  color: var(--color-bg-elevated);
+  font-size: 0.74rem;
+  font-weight: 850;
+  padding: 7px 10px;
+  position: absolute;
+  right: 0;
+  text-transform: uppercase;
+  top: 0;
+}
+
+.promo-price,
+.price-stack {
+  display: grid;
+  gap: 4px;
+}
+
+.promo-price s,
+.price-stack s {
+  color: var(--color-text-muted);
+  font-size: 0.88rem;
+}
+
+.promo-price strong,
+.price-stack strong {
+  color: var(--color-warning);
+}
+
+.promo-badge {
+  background: color-mix(in srgb, var(--color-warning) 16%, var(--color-surface));
+  border: 1px solid color-mix(in srgb, var(--color-warning) 42%, var(--color-border));
+  border-radius: 999px;
+  color: var(--color-warning);
+  display: inline-flex;
+  font-size: 0.82rem;
+  font-weight: 800;
+  padding: 6px 10px;
+}
+
+.promo-popover {
+  background: var(--color-surface);
+  border: 1px solid color-mix(in srgb, var(--color-warning) 50%, var(--color-border));
+  border-radius: 8px;
+  bottom: 110px;
+  box-shadow: var(--shadow-card);
+  display: grid;
+  gap: 14px;
+  max-width: min(420px, calc(100vw - 28px));
+  padding: 18px;
+  position: fixed;
+  right: 18px;
+  z-index: 35;
+}
+
+.promo-popover ul {
+  display: grid;
+  gap: 10px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.promo-popover li {
+  align-items: center;
+  border-top: 1px solid var(--color-border);
+  display: flex;
+  gap: 14px;
+  justify-content: space-between;
+  padding-top: 10px;
+}
+
+.promo-popover li:first-child {
+  border-top: 0;
+  padding-top: 0;
 }
 
 .product-card span,
@@ -1043,6 +1131,17 @@ tbody tr:hover {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes promo-pulse {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-2px);
   }
 }
 

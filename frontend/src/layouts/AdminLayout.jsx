@@ -127,6 +127,7 @@ function AdminLayout() {
         <nav className="admin-nav sidebar-nav" aria-label="Navegação administrativa">
           <NavLink to={basePath} end>Dashboard</NavLink>
           <NavLink to={`${basePath}/produtos`}>Produtos</NavLink>
+          <NavLink to={`${basePath}/estoque`}>Meu estoque</NavLink>
           <NavLink to={`${basePath}/funcionarios`}>Clientes</NavLink>
           <NavLink to={`${basePath}/pedidos`}>Pedidos</NavLink>
           <NavLink to={`${basePath}/faturas`}>Faturas</NavLink>

@@ -8,6 +8,11 @@ const produtoInicial = {
   estoqueAtual: '',
 }
 
+const promocaoInicial = {
+  produto: null,
+  precoPromocional: '',
+}
+
 const moeda = new Intl.NumberFormat('pt-BR', {
   style: 'currency',
   currency: 'BRL',
@@ -16,9 +21,11 @@ const moeda = new Intl.NumberFormat('pt-BR', {
 function ProdutosPage() {
   const [produtos, setProdutos] = useState([])
   const [form, setForm] = useState(produtoInicial)
+  const [promocao, setPromocao] = useState(promocaoInicial)
   const [produtoEditando, setProdutoEditando] = useState(null)
   const [carregando, setCarregando] = useState(true)
   const [salvando, setSalvando] = useState(false)
+  const [salvandoPromocao, setSalvandoPromocao] = useState(false)
   const [erro, setErro] = useState('')
   const [mensagem, setMensagem] = useState('')
 
@@ -62,6 +69,15 @@ function ProdutosPage() {
     })
   }
 
+  function abrirPromocao(produto) {
+    setPromocao({
+      produto,
+      precoPromocional: produto.precoPromocional || '',
+    })
+    setErro('')
+    setMensagem('')
+  }
+
   async function salvarProduto(event) {
     event.preventDefault()
     setErro('')
@@ -90,6 +106,49 @@ function ProdutosPage() {
       setErro('Não foi possível salvar o produto.')
     } finally {
       setSalvando(false)
+    }
+  }
+
+  async function salvarPromocao(event) {
+    event.preventDefault()
+    setErro('')
+    setMensagem('')
+    setSalvandoPromocao(true)
+
+    try {
+      await api.patch(`/produtos/${promocao.produto.id}/promocao`, {
+        promocaoAtiva: true,
+        precoPromocional: promocao.precoPromocional,
+      })
+      setPromocao(promocaoInicial)
+      setMensagem('Promoção ativada com sucesso.')
+      await carregarProdutos()
+    } catch (error) {
+      setErro(error.message || 'Não foi possível ativar a promoção.')
+    } finally {
+      setSalvandoPromocao(false)
+    }
+  }
+
+  async function removerPromocao(produto) {
+    const confirmou = window.confirm(`Remover a promoção de "${produto.nome}"?`)
+
+    if (!confirmou) {
+      return
+    }
+
+    setErro('')
+    setMensagem('')
+
+    try {
+      await api.patch(`/produtos/${produto.id}/promocao`, {
+        promocaoAtiva: false,
+        precoPromocional: null,
+      })
+      setMensagem('Promoção removida com sucesso.')
+      await carregarProdutos()
+    } catch {
+      setErro('Não foi possível remover a promoção.')
     }
   }
 
@@ -134,7 +193,7 @@ function ProdutosPage() {
           </label>
 
           <label>
-            Catégoria
+            Categoria
             <input
               onChange={(event) => atualizarCampo('categoria', event.target.value)}
               type="text"
@@ -194,10 +253,11 @@ function ProdutosPage() {
             <thead>
               <tr>
                 <th>Nome</th>
-                <th>Catégoria</th>
+                <th>Categoria</th>
                 <th>Preço</th>
+                <th>Promoção</th>
                 <th>Estoque</th>
-                <th>Acoes</th>
+                <th>Ações</th>
               </tr>
             </thead>
             <tbody>
@@ -205,11 +265,33 @@ function ProdutosPage() {
                 <tr key={produto.id}>
                   <td>{produto.nome}</td>
                   <td>{produto.categoria || '-'}</td>
-                  <td className="valor-mono">{moeda.format(Number(produto.preco))}</td>
+                  <td className="valor-mono">
+                    {produto.promocaoAtiva && produto.precoPromocional ? (
+                      <span className="price-stack">
+                        <s>{moeda.format(Number(produto.preco))}</s>
+                        <strong>{moeda.format(Number(produto.precoPromocional))}</strong>
+                      </span>
+                    ) : moeda.format(Number(produto.preco))}
+                  </td>
+                  <td>
+                    {produto.promocaoAtiva ? (
+                      <span className="promo-badge">Em promoção</span>
+                    ) : (
+                      <span className="muted">Sem promoção</span>
+                    )}
+                  </td>
                   <td className="valor-mono">{produto.estoqueAtual}</td>
                   <td>
                     <div className="row-actions">
                       <button type="button" onClick={() => editarProduto(produto)}>Editar</button>
+                      <button className="secondary-button" type="button" onClick={() => abrirPromocao(produto)}>
+                        {produto.promocaoAtiva ? 'Alterar promoção' : 'Criar promoção'}
+                      </button>
+                      {produto.promocaoAtiva && (
+                        <button className="secondary-button" type="button" onClick={() => removerPromocao(produto)}>
+                          Tirar promoção
+                        </button>
+                      )}
                       <button className="danger-button" type="button" onClick={() => excluirProduto(produto)}>
                         Excluir
                       </button>
@@ -221,6 +303,49 @@ function ProdutosPage() {
           </table>
         )}
       </div>
+
+      {promocao.produto && (
+        <div className="checkout-backdrop" role="presentation">
+          <form className="checkout-panel" onSubmit={salvarPromocao}>
+            <div className="section-title">
+              <h2>Promoção</h2>
+              <button
+                className="secondary-button"
+                disabled={salvandoPromocao}
+                onClick={() => setPromocao(promocaoInicial)}
+                type="button"
+              >
+                Fechar
+              </button>
+            </div>
+
+            <p className="muted">
+              Produto: <strong>{promocao.produto.nome}</strong>
+            </p>
+
+            <label>
+              Preço promocional
+              <input
+                className="valor-mono"
+                max={promocao.produto.preco}
+                min="0.01"
+                onChange={(event) => setPromocao((atual) => ({
+                  ...atual,
+                  precoPromocional: event.target.value,
+                }))}
+                required
+                step="0.01"
+                type="number"
+                value={promocao.precoPromocional}
+              />
+            </label>
+
+            <button disabled={salvandoPromocao} type="submit">
+              {salvandoPromocao ? 'Salvando...' : 'Ativar promoção'}
+            </button>
+          </form>
+        </div>
+      )}
     </section>
   )
 }

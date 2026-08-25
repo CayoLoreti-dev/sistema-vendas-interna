@@ -8,18 +8,32 @@ const moeda = new Intl.NumberFormat('pt-BR', {
 
 const produtoInicialQuantidade = 1
 
+function produtoEmPromocao(produto) {
+  return Boolean(produto.promocaoAtiva && produto.precoPromocional)
+}
+
+function precoAtual(produto) {
+  return Number(produtoEmPromocao(produto) ? produto.precoPromocional : produto.preco)
+}
+
 function CatalogoPage() {
   const [produtos, setProdutos] = useState([])
   const [quantidades, setQuantidades] = useState({})
   const [carrinho, setCarrinho] = useState([])
   const [checkoutAberto, setCheckoutAberto] = useState(false)
+  const [promocoesAbertas, setPromocoesAbertas] = useState(false)
   const [carregando, setCarregando] = useState(true)
   const [enviando, setEnviando] = useState(false)
   const [erro, setErro] = useState('')
   const [confirmacao, setConfirmacao] = useState('')
 
+  const produtosEmPromocao = useMemo(
+    () => produtos.filter(produtoEmPromocao),
+    [produtos],
+  )
+
   const totalCarrinho = useMemo(() => carrinho.reduce(
-    (total, item) => total + Number(item.produto.preco) * item.quantidade,
+    (total, item) => total + precoAtual(item.produto) * item.quantidade,
     0,
   ), [carrinho])
 
@@ -30,6 +44,7 @@ function CatalogoPage() {
     try {
       const dados = await api.get('/produtos')
       setProdutos(dados)
+      setPromocoesAbertas(dados.some(produtoEmPromocao))
     } catch {
       setErro('Não foi possível carregar os produtos. Tente novamente em instantes.')
     } finally {
@@ -67,7 +82,7 @@ function CatalogoPage() {
       if (itemExistente) {
         return atual.map((item) => (
           item.produto.id === produto.id
-            ? { ...item, quantidade: novaQuantidade }
+            ? { ...item, produto, quantidade: novaQuantidade }
             : item
         ))
       }
@@ -114,7 +129,7 @@ function CatalogoPage() {
       if (metodoPagamento === 'FIADO') {
         setConfirmacao('Pedido registrado! Vai ficar no fiado até você acertar com a vendedora.')
       } else {
-        setConfirmacao('Pedido registrado! Combine o Pix com a vendedora - em breve o pagamento por Pix vai ficar automático aqui direto no app.')
+        setConfirmacao('Pedido registrado! Combine o Pix com a vendedora.')
       }
     } catch (error) {
       setErro(error.message || 'Não foi possível registrar o pedido. Confira os itens e tente de novo.')
@@ -145,13 +160,22 @@ function CatalogoPage() {
         <div className="catalog-grid">
           {produtos.map((produto) => {
             const semEstoque = produto.estoqueAtual === 0
+            const emPromocao = produtoEmPromocao(produto)
 
             return (
-              <article className={`product-card ${semEstoque ? 'disabled' : ''}`} key={produto.id}>
+              <article className={`product-card ${semEstoque ? 'disabled' : ''} ${emPromocao ? 'promo-card' : ''}`} key={produto.id}>
+                {emPromocao && <span className="promo-ribbon">Promoção</span>}
                 <div>
                   <span>{produto.categoria || 'Produto'}</span>
                   <h2>{produto.nome}</h2>
-                  <strong className="valor-mono">{moeda.format(Number(produto.preco))}</strong>
+                  {emPromocao ? (
+                    <div className="promo-price">
+                      <s>{moeda.format(Number(produto.preco))}</s>
+                      <strong className="valor-mono">{moeda.format(Number(produto.precoPromocional))}</strong>
+                    </div>
+                  ) : (
+                    <strong className="valor-mono">{moeda.format(Number(produto.preco))}</strong>
+                  )}
                   <p>{semEstoque ? 'Sem estoque no momento' : <><span className="valor-mono">{produto.estoqueAtual}</span> disponível</>}</p>
                 </div>
 
@@ -180,6 +204,25 @@ function CatalogoPage() {
         </div>
       )}
 
+      {promocoesAbertas && produtosEmPromocao.length > 0 && (
+        <div className="promo-popover" role="dialog" aria-label="Produtos em promoção">
+          <div className="section-title">
+            <h2>Promoções de hoje</h2>
+            <button className="secondary-button" onClick={() => setPromocoesAbertas(false)} type="button">
+              Fechar
+            </button>
+          </div>
+          <ul>
+            {produtosEmPromocao.map((produto) => (
+              <li key={produto.id}>
+                <span>{produto.nome}</span>
+                <strong className="valor-mono">{moeda.format(Number(produto.precoPromocional))}</strong>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       {carrinho.length > 0 && (
         <aside className="cart-panel" aria-label="Carrinho">
           <div className="cart-header">
@@ -200,6 +243,7 @@ function CatalogoPage() {
                   type="number"
                   value={item.quantidade}
                 />
+                <strong className="valor-mono">{moeda.format(precoAtual(item.produto) * item.quantidade)}</strong>
                 <button
                   className="secondary-button"
                   onClick={() => removerItem(item.produto.id)}
@@ -236,7 +280,7 @@ function CatalogoPage() {
               {carrinho.map((item) => (
                 <li key={item.produto.id}>
                   <span>{item.produto.nome} x <span className="valor-mono">{item.quantidade}</span></span>
-                  <strong className="valor-mono">{moeda.format(Number(item.produto.preco) * item.quantidade)}</strong>
+                  <strong className="valor-mono">{moeda.format(precoAtual(item.produto) * item.quantidade)}</strong>
                 </li>
               ))}
             </ul>

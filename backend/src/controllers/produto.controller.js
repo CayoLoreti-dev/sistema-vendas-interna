@@ -56,6 +56,35 @@ async function atualizarProduto(req, res) {
   }
 }
 
+async function atualizarPromocao(req, res) {
+  const { id } = req.params
+  const { promocaoAtiva, precoPromocional } = req.body
+
+  if (promocaoAtiva) {
+    if (precoPromocional === undefined || Number(precoPromocional) <= 0) {
+      return res.status(400).json({ mensagem: 'Informe um preco promocional valido' })
+    }
+  }
+
+  try {
+    const produto = await prisma.produto.update({
+      where: { id },
+      data: {
+        promocaoAtiva: Boolean(promocaoAtiva),
+        precoPromocional: promocaoAtiva ? precoPromocional : null,
+      },
+    })
+
+    return res.json(produto)
+  } catch (error) {
+    if (error.code === 'P2025') {
+      return res.status(404).json({ mensagem: 'Produto nao encontrado' })
+    }
+
+    return res.status(500).json({ mensagem: 'Erro ao atualizar promocao' })
+  }
+}
+
 async function deletarProduto(req, res) {
   const { id } = req.params
 
@@ -78,5 +107,6 @@ module.exports = {
   listarProdutos,
   criarProduto,
   atualizarProduto,
+  atualizarPromocao,
   deletarProduto,
 }

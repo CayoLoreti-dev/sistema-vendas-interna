@@ -67,6 +67,14 @@ function metodoPagamentoLabel(metodoPagamento) {
   return metodoPagamento === 'PIX' ? 'Aguardando Pix' : 'Fiado'
 }
 
+function precoAtualProduto(produto) {
+  if (produto.promocaoAtiva && produto.precoPromocional) {
+    return produto.precoPromocional
+  }
+
+  return produto.preco
+}
+
 async function criarPedidoParaUsuario(usuarioId, itensRecebidos, metodoPagamentoRecebido) {
   const itens = validarEAgruparItens(itensRecebidos)
   const metodoPagamento = validarMetodoPagamento(metodoPagamentoRecebido)
@@ -105,7 +113,7 @@ async function criarPedidoParaUsuario(usuarioId, itensRecebidos, metodoPagamento
 
     const valorTotal = itens.reduce((total, item) => {
       const produto = produtosPorId.get(item.produtoId)
-      return total.add(produto.preco.mul(item.quantidade))
+      return total.add(precoAtualProduto(produto).mul(item.quantidade))
     }, new Prisma.Decimal(0))
 
     const pedidoCriado = await tx.pedido.create({
@@ -143,7 +151,7 @@ async function criarPedidoParaUsuario(usuarioId, itensRecebidos, metodoPagamento
           pedidoId: pedidoCriado.id,
           produtoId: item.produtoId,
           quantidade: item.quantidade,
-          precoUnitario: produto.preco,
+          precoUnitario: precoAtualProduto(produto),
         },
       })
     }
