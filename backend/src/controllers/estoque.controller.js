@@ -25,6 +25,42 @@ function quantidadeValida(quantidade) {
   return Number.isInteger(quantidade) && quantidade > 0
 }
 
+function normalizarDadosCompra(body) {
+  const fornecedor = String(body?.fornecedor || '').trim()
+  const precoPago = body?.precoPago
+  const tipoCompra = body?.tipoCompra
+  const quantidadeCaixas = Number(body?.quantidadeCaixas || 0)
+  const quantidadePacotes = Number(body?.quantidadePacotes || 0)
+
+  if (!fornecedor) {
+    throw new EstoqueError(400, 'Informe o fornecedor')
+  }
+
+  if (precoPago === undefined || Number(precoPago) <= 0) {
+    throw new EstoqueError(400, 'Informe o preco pago')
+  }
+
+  if (!['CAIXA', 'PACOTE'].includes(tipoCompra)) {
+    throw new EstoqueError(400, 'Informe se a compra foi em caixa ou pacote')
+  }
+
+  if (tipoCompra === 'CAIXA' && !quantidadeValida(quantidadeCaixas)) {
+    throw new EstoqueError(400, 'Informe quantas caixas foram compradas')
+  }
+
+  if (tipoCompra === 'PACOTE' && !quantidadeValida(quantidadePacotes)) {
+    throw new EstoqueError(400, 'Informe quantos pacotes foram comprados')
+  }
+
+  return {
+    fornecedor,
+    precoPago,
+    tipoCompra,
+    quantidadeCaixas: tipoCompra === 'CAIXA' ? quantidadeCaixas : null,
+    quantidadePacotes: tipoCompra === 'PACOTE' ? quantidadePacotes : null,
+  }
+}
+
 function responderErro(error, res) {
   if (error instanceof EstoqueError) {
     return res.status(error.status).json({ mensagem: error.mensagem })
@@ -87,6 +123,7 @@ async function adicionarEntrada(req, res) {
 
   try {
     const vendedorId = await obterVendedorAlvo(req, req.body?.vendedorId)
+    const dadosCompra = normalizarDadosCompra(req.body)
 
     const item = await prisma.$transaction(async (tx) => {
       const produto = await tx.produto.findUnique({
@@ -124,6 +161,7 @@ async function adicionarEntrada(req, res) {
           produtoId,
           tipo: 'ENTRADA',
           quantidade,
+          ...dadosCompra,
         },
       })
 

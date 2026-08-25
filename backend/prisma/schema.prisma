@@ -28,6 +28,11 @@ enum TipoMovimentacaoEstoque {
   COLOCOU_PRA_VENDA
 }
 
+enum TipoCompraEstoque {
+  CAIXA
+  PACOTE
+}
+
 model Usuario {
   id                   String                @id @default(uuid())
   nome                 String
@@ -123,16 +128,21 @@ model EstoqueInterno {
 }
 
 model MovimentacaoEstoque {
-  id         String                  @id @default(uuid())
-  estoque    EstoqueInterno          @relation(fields: [estoqueId], references: [id])
-  estoqueId  String
-  vendedor   Usuario                 @relation(fields: [vendedorId], references: [id])
-  vendedorId String
-  produto    Produto                 @relation(fields: [produtoId], references: [id])
-  produtoId  String
-  tipo       TipoMovimentacaoEstoque
-  quantidade Int
-  criadoEm   DateTime                @default(now())
+  id                String                  @id @default(uuid())
+  estoque           EstoqueInterno          @relation(fields: [estoqueId], references: [id])
+  estoqueId         String
+  vendedor          Usuario                 @relation(fields: [vendedorId], references: [id])
+  vendedorId        String
+  produto           Produto                 @relation(fields: [produtoId], references: [id])
+  produtoId         String
+  tipo              TipoMovimentacaoEstoque
+  quantidade        Int
+  fornecedor        String?
+  precoPago         Decimal?                @db.Decimal(10, 2)
+  tipoCompra        TipoCompraEstoque?
+  quantidadeCaixas  Int?
+  quantidadePacotes Int?
+  criadoEm          DateTime                @default(now())
 
   @@map("movimentacoes_estoque")
 }

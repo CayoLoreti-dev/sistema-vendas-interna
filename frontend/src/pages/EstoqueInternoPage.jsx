@@ -6,6 +6,11 @@ const entradaInicial = {
   vendedorId: '',
   produtoId: '',
   quantidade: '',
+  fornecedor: '',
+  precoPago: '',
+  tipoCompra: 'CAIXA',
+  quantidadeCaixas: '',
+  quantidadePacotes: '',
 }
 
 const vendaInicial = {
@@ -15,6 +20,10 @@ const vendaInicial = {
 
 function tipoMovimentacaoLabel(tipo) {
   return tipo === 'COLOCOU_PRA_VENDA' ? 'Colocou pra venda' : 'Entrada'
+}
+
+function tipoCompraLabel(tipoCompra) {
+  return tipoCompra === 'PACOTE' ? 'Pacotes' : 'Caixas'
 }
 
 function EstoqueInternoPage() {
@@ -83,6 +92,11 @@ function EstoqueInternoPage() {
       await api.post('/estoque-interno/entrada', {
         produtoId: entrada.produtoId,
         quantidade: Number(entrada.quantidade),
+        fornecedor: entrada.fornecedor,
+        precoPago: entrada.precoPago,
+        tipoCompra: entrada.tipoCompra,
+        quantidadeCaixas: entrada.tipoCompra === 'CAIXA' ? Number(entrada.quantidadeCaixas) : null,
+        quantidadePacotes: entrada.tipoCompra === 'PACOTE' ? Number(entrada.quantidadePacotes) : null,
         ...(isMaster && { vendedorId: entrada.vendedorId }),
       })
 
@@ -163,7 +177,7 @@ function EstoqueInternoPage() {
       )}
 
       <form className="form-panel" onSubmit={adicionarEntrada}>
-        <h2>Adicionar entrada</h2>
+        <h2>Cadastrar produto no estoque</h2>
         <div className="form-grid">
           {isMaster && (
             <label>
@@ -207,9 +221,72 @@ function EstoqueInternoPage() {
               value={entrada.quantidade}
             />
           </label>
+
+          <label>
+            Fornecedor
+            <input
+              onChange={(event) => atualizarEntrada('fornecedor', event.target.value)}
+              required
+              type="text"
+              value={entrada.fornecedor}
+            />
+          </label>
+
+          <label>
+            Preço pago
+            <input
+              className="valor-mono"
+              min="0.01"
+              onChange={(event) => atualizarEntrada('precoPago', event.target.value)}
+              required
+              step="0.01"
+              type="number"
+              value={entrada.precoPago}
+            />
+          </label>
+
+          <label>
+            Tipo da compra
+            <select
+              onChange={(event) => atualizarEntrada('tipoCompra', event.target.value)}
+              required
+              value={entrada.tipoCompra}
+            >
+              <option value="CAIXA">Caixa</option>
+              <option value="PACOTE">Pacote</option>
+            </select>
+          </label>
+
+          {entrada.tipoCompra === 'CAIXA' ? (
+            <label>
+              Quantas caixas
+              <input
+                className="valor-mono"
+                min="1"
+                onChange={(event) => atualizarEntrada('quantidadeCaixas', event.target.value)}
+                required
+                step="1"
+                type="number"
+                value={entrada.quantidadeCaixas}
+              />
+            </label>
+          ) : (
+            <label>
+              Quantos pacotes
+              <input
+                className="valor-mono"
+                min="1"
+                onChange={(event) => atualizarEntrada('quantidadePacotes', event.target.value)}
+                required
+                step="1"
+                type="number"
+                value={entrada.quantidadePacotes}
+              />
+            </label>
+          )}
         </div>
         <button disabled={salvandoEntrada || produtos.length === 0} type="submit">
-          {salvandoEntrada ? 'Salvando...' : 'Adicionar ao estoque'}
+          {salvandoEntrada ? 'Salvando...' : 'Cadastrar no estoque'}
         </button>
       </form>
 
@@ -281,7 +358,20 @@ function EstoqueInternoPage() {
             <ul className="items-list">
               {historico.movimentacoes.map((movimentacao) => (
                 <li key={movimentacao.id}>
-                  <span>{tipoMovimentacaoLabel(movimentacao.tipo)}</span>
+                  <div>
+                    <span>{tipoMovimentacaoLabel(movimentacao.tipo)}</span>
+                    {movimentacao.tipo === 'ENTRADA' && (
+                      <p className="muted">
+                        {movimentacao.fornecedor} · {tipoCompraLabel(movimentacao.tipoCompra)}:{' '}
+                        <span className="valor-mono">
+                          {movimentacao.tipoCompra === 'CAIXA'
+                            ? movimentacao.quantidadeCaixas
+                            : movimentacao.quantidadePacotes}
+                        </span>
+                        {' '}· pago: <span className="valor-mono">R$ {Number(movimentacao.precoPago).toFixed(2)}</span>
+                      </p>
+                    )}
+                  </div>
                   <strong className="valor-mono">{movimentacao.quantidade} un.</strong>
                   <small>{new Date(movimentacao.criadoEm).toLocaleString('pt-BR')}</small>
                 </li>
