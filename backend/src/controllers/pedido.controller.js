@@ -277,6 +277,86 @@ async function pagarPedido(req, res) {
   return res.json(pedidoPago)
 }
 
+async function removerItemPedido(req, res) {
+  const { pedidoId, itemId } = req.params
+
+  try {
+    const resultado = await prisma.$transaction(async (tx) => {
+      const item = await tx.itemPedido.findUnique({
+        where: { id: itemId },
+        include: {
+          pedido: {
+            include: {
+              itens: true,
+            },
+          },
+          produto: {
+            select: {
+              nome: true,
+            },
+          },
+        },
+      })
+
+      if (!item || item.pedidoId !== pedidoId) {
+        throw new PedidoError(404, 'Item da fatura nao encontrado')
+      }
+
+      if (item.pedido.status === 'PAGO') {
+        throw new PedidoError(400, 'Nao e possivel retirar item de uma fatura ja paga')
+      }
+
+      await tx.produto.update({
+        where: { id: item.produtoId },
+        data: {
+          estoqueAtual: {
+            increment: item.quantidade,
+          },
+        },
+      })
+
+      await tx.itemPedido.delete({
+        where: { id: item.id },
+      })
+
+      if (item.pedido.itens.length === 1) {
+        await tx.pedido.delete({
+          where: { id: pedidoId },
+        })
+
+        return {
+          pedidoRemovido: true,
+          mensagem: `${item.produto.nome} retirado da fatura.`,
+        }
+      }
+
+      const valorRemovido = item.precoUnitario.mul(item.quantidade)
+
+      const pedidoAtualizado = await tx.pedido.update({
+        where: { id: pedidoId },
+        data: {
+          valorTotal: item.pedido.valorTotal.sub(valorRemovido),
+        },
+        include: pedidoInclude(),
+      })
+
+      return {
+        pedidoRemovido: false,
+        mensagem: `${item.produto.nome} retirado da fatura.`,
+        pedido: pedidoAtualizado,
+      }
+    })
+
+    return res.json(resultado)
+  } catch (error) {
+    if (error instanceof PedidoError) {
+      return res.status(error.status).json({ mensagem: error.mensagem })
+    }
+
+    return res.status(500).json({ mensagem: 'Nao foi possivel retirar o item da fatura' })
+  }
+}
+
 async function saldoPorUsuario(usuarioId) {
   const pedidos = await prisma.pedido.findMany({
     where: {
@@ -314,6 +394,7 @@ module.exports = {
   listarPedidos,
   buscarPedido,
   pagarPedido,
+  removerItemPedido,
   meuSaldo,
   saldoUsuario,
 }

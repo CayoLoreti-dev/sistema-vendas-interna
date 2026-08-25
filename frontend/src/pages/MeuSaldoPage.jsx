@@ -8,7 +8,7 @@ const moeda = new Intl.NumberFormat('pt-BR', {
 
 function formatarData(data) {
   return new Date(data).toLocaleString('pt-BR', {
-    datéStyle: 'short',
+    dateStyle: 'short',
     timeStyle: 'short',
   })
 }
@@ -83,8 +83,14 @@ function MeuSaldoPage() {
                   <ul className="items-list">
                     {pedido.itens.map((item) => (
                       <li key={item.id}>
-                        <span>{item.produto.nome}</span>
-                        <strong className="valor-mono">{item.quantidade} un.</strong>
+                        <span className="invoice-item-main">
+                          <span>{item.produto.nome}</span>
+                          <small>Retirado em {formatarData(pedido.criadoEm)}</small>
+                        </span>
+                        <span className="invoice-item-values">
+                          <strong className="valor-mono">{item.quantidade} un.</strong>
+                          <span className="valor-mono">{moeda.format(Number(item.precoUnitario) * item.quantidade)}</span>
+                        </span>
                       </li>
                     ))}
                   </ul>

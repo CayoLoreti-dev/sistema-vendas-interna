@@ -5,6 +5,7 @@ const {
   listarPedidos,
   buscarPedido,
   pagarPedido,
+  removerItemPedido,
   meuSaldo,
   saldoUsuario,
 } = require('../controllers/pedido.controller')
@@ -17,6 +18,7 @@ router.post('/admin', authMiddleware, vendedorOuAdmin, criarPedidoAdmin)
 router.get('/', authMiddleware, listarPedidos)
 router.get('/meu-saldo', authMiddleware, meuSaldo)
 router.get('/saldo/:usuarioId', authMiddleware, vendedorOuAdmin, saldoUsuario)
+router.delete('/:pedidoId/itens/:itemId', authMiddleware, vendedorOuAdmin, removerItemPedido)
 router.get('/:id', authMiddleware, buscarPedido)
 router.patch('/:id/pagar', authMiddleware, vendedorOuAdmin, pagarPedido)
 

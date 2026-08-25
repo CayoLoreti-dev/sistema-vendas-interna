@@ -8,7 +8,7 @@ const moeda = new Intl.NumberFormat('pt-BR', {
 
 function formatarData(data) {
   return new Date(data).toLocaleString('pt-BR', {
-    datéStyle: 'short',
+    dateStyle: 'short',
     timeStyle: 'short',
   })
 }
@@ -25,6 +25,7 @@ function FaturasPage() {
   const [quantidade, setQuantidade] = useState('1')
   const [carregando, setCarregando] = useState(true)
   const [pagandoId, setPagandoId] = useState(null)
+  const [removendoItemId, setRemovendoItemId] = useState(null)
   const [adicionandoProduto, setAdicionandoProduto] = useState(false)
   const [erro, setErro] = useState('')
   const [mensagem, setMensagem] = useState('')
@@ -188,6 +189,28 @@ function FaturasPage() {
     }
   }
 
+  async function retirarItemDaFatura(pedido, item) {
+    const confirmou = window.confirm(`Retirar "${item.produto.nome}" da fatura de ${faturaSelecionada.usuario.nome}?`)
+
+    if (!confirmou) {
+      return
+    }
+
+    setErro('')
+    setMensagem('')
+    setRemovendoItemId(item.id)
+
+    try {
+      await api.delete(`/pedidos/${pedido.id}/itens/${item.id}`)
+      setMensagem('Produto retirado da fatura.')
+      await carregarFaturas()
+    } catch (error) {
+      setErro(error.message || 'Não foi possível retirar esse produto da fatura.')
+    } finally {
+      setRemovendoItemId(null)
+    }
+  }
+
   return (
     <section className="page-stack">
       <div className="page-heading">
@@ -317,8 +340,22 @@ function FaturasPage() {
                     <ul className="items-list">
                       {pedido.itens.map((item) => (
                         <li key={item.id}>
-                          <span>{item.produto.nome}</span>
-                          <strong className="valor-mono">{item.quantidade} un.</strong>
+                          <span className="invoice-item-main">
+                            <span>{item.produto.nome}</span>
+                            <small>{formatarData(pedido.criadoEm)}</small>
+                          </span>
+                          <span className="invoice-item-values">
+                            <strong className="valor-mono">{item.quantidade} un.</strong>
+                            <span className="valor-mono">{moeda.format(Number(item.precoUnitario) * item.quantidade)}</span>
+                          </span>
+                          <button
+                            className="danger-button compact-button"
+                            disabled={removendoItemId === item.id}
+                            onClick={() => retirarItemDaFatura(pedido, item)}
+                            type="button"
+                          >
+                            {removendoItemId === item.id ? 'Retirando...' : 'Retirar'}
+                          </button>
                         </li>
                       ))}
                     </ul>

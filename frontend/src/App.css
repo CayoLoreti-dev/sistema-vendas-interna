@@ -527,6 +527,11 @@ button:disabled {
   color: var(--color-bg-elevated);
 }
 
+.compact-button {
+  min-height: 38px;
+  padding: 8px 12px;
+}
+
 .table-panel {
   overflow-x: auto;
 }
@@ -836,6 +841,39 @@ tbody tr:hover {
 .items-list li {
   border-top: 1px solid var(--color-border);
   padding-top: 10px;
+}
+
+.items-list li {
+  align-items: center;
+  display: grid;
+  gap: 14px;
+  grid-template-columns: minmax(0, 1fr) minmax(120px, max-content) auto;
+}
+
+.invoice-item-main,
+.invoice-item-values {
+  display: grid;
+  gap: 5px;
+}
+
+.invoice-item-main {
+  min-width: 0;
+}
+
+.invoice-item-main > span {
+  color: var(--color-text);
+  font-weight: 720;
+  overflow-wrap: anywhere;
+}
+
+.invoice-item-main small,
+.invoice-item-values span {
+  color: var(--color-text-muted);
+  font-size: 0.86rem;
+}
+
+.invoice-item-values {
+  justify-items: end;
 }
 
 .low-stock-list li:first-child,
@@ -1160,6 +1198,15 @@ tbody tr:hover {
   .cart-panel li {
     align-items: stretch;
     display: grid;
+  }
+
+  .items-list li {
+    align-items: stretch;
+    grid-template-columns: 1fr;
+  }
+
+  .invoice-item-values {
+    justify-items: start;
   }
 }
 
