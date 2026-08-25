@@ -222,9 +222,11 @@ function FaturasPage() {
                 onClick={() => setClienteSelecionadoId(fatura.usuario.id)}
                 type="button"
               >
-                <span>{fatura.usuario.nome}</span>
-                <strong className="valor-mono">{moeda.format(fatura.total)}</strong>
-                <small className="valor-mono">{fatura.pedidos.length} pedido(s)</small>
+                <span className="invoice-client-name">{fatura.usuario.nome}</span>
+                <span className="invoice-client-meta">
+                  <strong className="valor-mono">{moeda.format(fatura.total)}</strong>
+                  <small className="valor-mono">{fatura.pedidos.length} pedido(s)</small>
+                </span>
               </button>
             ))}
           </aside>

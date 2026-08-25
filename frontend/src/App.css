@@ -594,6 +594,13 @@ tbody tr:hover {
   padding: 22px;
 }
 
+.invoice-total-card {
+  align-items: center;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
 .summary-card.attention,
 .low-stock-list {
   background: color-mix(in srgb, var(--color-warning) 10%, var(--color-surface));
@@ -639,6 +646,15 @@ tbody tr:hover {
   display: flex;
   gap: 12px;
   justify-content: space-between;
+}
+
+.invoice-detail-header {
+  gap: 20px;
+}
+
+.invoice-actions {
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 .section-title a,
@@ -952,13 +968,31 @@ tbody tr:hover {
 
 .invoice-total-card,
 .invoice-client {
-  padding: 16px;
+  padding: 18px;
 }
 
 .invoice-client {
+  align-items: center;
   color: var(--color-text);
-  justify-items: start;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(0, 1fr) auto;
   text-align: left;
+  width: 100%;
+}
+
+.invoice-client-name {
+  font-weight: 760;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.invoice-client-meta {
+  align-items: flex-end;
+  display: grid;
+  gap: 4px;
+  justify-items: end;
+  min-width: max-content;
 }
 
 .invoice-client.active,
@@ -971,8 +1005,17 @@ tbody tr:hover {
 .invoice-add-form {
   align-items: end;
   display: grid;
-  gap: 14px;
-  grid-template-columns: minmax(220px, 1fr) minmax(120px, 160px) auto;
+  gap: 16px;
+  grid-template-columns: minmax(260px, 1fr) minmax(120px, 160px) max-content;
+}
+
+.invoice-add-form button {
+  min-height: 46px;
+  white-space: nowrap;
+}
+
+.invoice-add-form select {
+  min-width: 0;
 }
 
 .positive-panel h2 {
@@ -1102,6 +1145,16 @@ tbody tr:hover {
   .invoice-add-form,
   .invoice-layout {
     grid-template-columns: 1fr;
+  }
+
+  .invoice-total-card,
+  .invoice-client {
+    grid-template-columns: 1fr;
+  }
+
+  .invoice-client-meta {
+    align-items: start;
+    justify-items: start;
   }
 
   .cart-panel li {
