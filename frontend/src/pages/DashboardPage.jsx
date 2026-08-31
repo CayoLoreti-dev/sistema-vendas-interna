@@ -96,8 +96,8 @@ function DashboardPage() {
               <ul>
                 {produtosBaixoEstoque.map((produto) => (
                   <li key={produto.id}>
-                    <span>{produto.nome}</span>
-                    <strong className="valor-mono">{produto.estoqueAtual} un.</strong>
+                    <span className="low-stock-product">{produto.nome}</span>
+                    <strong className="valor-mono low-stock-quantity">{produto.estoqueAtual} un.</strong>
                   </li>
                 ))}
               </ul>

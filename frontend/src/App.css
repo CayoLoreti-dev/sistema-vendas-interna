@@ -612,6 +612,11 @@ tbody tr:hover {
   border-color: color-mix(in srgb, var(--color-warning) 42%, var(--color-border));
 }
 
+.low-stock-list {
+  display: grid;
+  gap: 18px;
+}
+
 .summary-card span,
 .balance-card span,
 .invoice-total-card span {
@@ -841,6 +846,30 @@ tbody tr:hover {
 .items-list li {
   border-top: 1px solid var(--color-border);
   padding-top: 10px;
+}
+
+.low-stock-list li {
+  align-items: center;
+  display: grid;
+  gap: 14px;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.low-stock-product {
+  color: var(--color-text);
+  font-weight: 680;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.low-stock-quantity {
+  background: color-mix(in srgb, var(--color-warning) 16%, var(--color-surface));
+  border: 1px solid color-mix(in srgb, var(--color-warning) 34%, var(--color-border));
+  border-radius: 999px;
+  color: var(--color-warning);
+  justify-self: end;
+  padding: 5px 10px;
+  white-space: nowrap;
 }
 
 .items-list li {
@@ -1205,6 +1234,15 @@ tbody tr:hover {
   .items-list li {
     align-items: stretch;
     grid-template-columns: 1fr;
+  }
+
+  .low-stock-list li {
+    align-items: start;
+    grid-template-columns: 1fr;
+  }
+
+  .low-stock-quantity {
+    justify-self: start;
   }
 
   .invoice-item-values {
