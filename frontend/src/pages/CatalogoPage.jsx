@@ -8,6 +8,16 @@ const moeda = new Intl.NumberFormat('pt-BR', {
 
 const produtoInicialQuantidade = 1
 
+function limitarQuantidade(valor, estoqueAtual) {
+  const quantidade = Number.parseInt(valor, 10)
+
+  if (!Number.isFinite(quantidade)) {
+    return produtoInicialQuantidade
+  }
+
+  return Math.max(produtoInicialQuantidade, Math.min(quantidade, estoqueAtual))
+}
+
 function produtoEmPromocao(produto) {
   return Boolean(produto.promocaoAtiva && produto.precoPromocional)
 }
@@ -61,7 +71,7 @@ function CatalogoPage() {
   }
 
   function atualizarQuantidade(produto, valor) {
-    const quantidade = Math.max(1, Math.min(Number(valor), produto.estoqueAtual))
+    const quantidade = limitarQuantidade(valor, produto.estoqueAtual)
 
     setQuantidades((atual) => ({
       ...atual,
@@ -70,7 +80,7 @@ function CatalogoPage() {
   }
 
   function adicionarAoCarrinho(produto) {
-    const quantidade = quantidadeSelecionada(produto)
+    const quantidade = limitarQuantidade(quantidadeSelecionada(produto), produto.estoqueAtual)
     setConfirmacao('')
     setErro('')
 
@@ -99,7 +109,7 @@ function CatalogoPage() {
 
       return {
         ...item,
-        quantidade: Math.max(1, Math.min(Number(quantidade), item.produto.estoqueAtual)),
+        quantidade: limitarQuantidade(quantidade, item.produto.estoqueAtual),
       }
     }))
   }
@@ -111,15 +121,25 @@ function CatalogoPage() {
   async function finalizarPedido(metodoPagamento) {
     setErro('')
     setConfirmacao('')
+
+    const itensValidos = carrinho
+      .map((item) => ({
+        produtoId: item.produto.id,
+        quantidade: limitarQuantidade(item.quantidade, item.produto.estoqueAtual),
+      }))
+      .filter((item) => item.produtoId && item.quantidade > 0)
+
+    if (itensValidos.length === 0) {
+      setErro('Seu carrinho está vazio. Escolha pelo menos um produto antes de finalizar.')
+      return
+    }
+
     setEnviando(true)
 
     try {
       await api.post('/pedidos', {
         metodoPagamento,
-        itens: carrinho.map((item) => ({
-          produtoId: item.produto.id,
-          quantidade: item.quantidade,
-        })),
+        itens: itensValidos,
       })
 
       setCarrinho([])
