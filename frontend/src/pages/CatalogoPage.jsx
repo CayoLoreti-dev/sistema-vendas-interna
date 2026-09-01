@@ -8,14 +8,19 @@ const moeda = new Intl.NumberFormat('pt-BR', {
 
 const produtoInicialQuantidade = 1
 
-function limitarQuantidade(valor, estoqueAtual) {
+function limparQuantidade(valor) {
+  return String(valor).replace(/\D/g, '')
+}
+
+function limitarQuantidade(valor, estoqueAtual, fallback = produtoInicialQuantidade) {
   const quantidade = Number.parseInt(valor, 10)
+  const estoque = Number(estoqueAtual) || 0
 
   if (!Number.isFinite(quantidade)) {
-    return produtoInicialQuantidade
+    return fallback
   }
 
-  return Math.max(produtoInicialQuantidade, Math.min(quantidade, estoqueAtual))
+  return Math.max(produtoInicialQuantidade, Math.min(quantidade, estoque))
 }
 
 function produtoEmPromocao(produto) {
@@ -43,7 +48,7 @@ function CatalogoPage() {
   )
 
   const totalCarrinho = useMemo(() => carrinho.reduce(
-    (total, item) => total + precoAtual(item.produto) * item.quantidade,
+    (total, item) => total + precoAtual(item.produto) * limitarQuantidade(item.quantidade, item.produto.estoqueAtual, 0),
     0,
   ), [carrinho])
 
@@ -67,15 +72,20 @@ function CatalogoPage() {
   }, [])
 
   function quantidadeSelecionada(produto) {
-    return Number(quantidades[produto.id] || produtoInicialQuantidade)
+    return quantidades[produto.id] ?? String(produtoInicialQuantidade)
   }
 
   function atualizarQuantidade(produto, valor) {
-    const quantidade = limitarQuantidade(valor, produto.estoqueAtual)
-
     setQuantidades((atual) => ({
       ...atual,
-      [produto.id]: quantidade,
+      [produto.id]: limparQuantidade(valor),
+    }))
+  }
+
+  function normalizarQuantidadeProduto(produto) {
+    setQuantidades((atual) => ({
+      ...atual,
+      [produto.id]: String(limitarQuantidade(atual[produto.id], produto.estoqueAtual)),
     }))
   }
 
@@ -109,7 +119,20 @@ function CatalogoPage() {
 
       return {
         ...item,
-        quantidade: limitarQuantidade(quantidade, item.produto.estoqueAtual),
+        quantidade: limparQuantidade(quantidade),
+      }
+    }))
+  }
+
+  function normalizarItemCarrinho(produtoId) {
+    setCarrinho((atual) => atual.map((item) => {
+      if (item.produto.id !== produtoId) {
+        return item
+      }
+
+      return {
+        ...item,
+        quantidade: limitarQuantidade(item.quantidade, item.produto.estoqueAtual),
       }
     }))
   }
@@ -206,9 +229,12 @@ function CatalogoPage() {
                       <input
                         max={produto.estoqueAtual}
                         min="1"
-                        onChange={(event) => atualizarQuantidade(produto, event.target.value)}
                         className="valor-mono"
-                        type="number"
+                        inputMode="numeric"
+                        onBlur={() => normalizarQuantidadeProduto(produto)}
+                        onChange={(event) => atualizarQuantidade(produto, event.target.value)}
+                        pattern="[0-9]*"
+                        type="text"
                         value={quantidadeSelecionada(produto)}
                       />
                     </label>
@@ -251,28 +277,35 @@ function CatalogoPage() {
           </div>
 
           <ul>
-            {carrinho.map((item) => (
-              <li key={item.produto.id}>
-                <span>{item.produto.nome}</span>
-                <input
-                  aria-label={`Quantidade de ${item.produto.nome}`}
-                  className="valor-mono"
-                  max={item.produto.estoqueAtual}
-                  min="1"
-                  onChange={(event) => atualizarItemCarrinho(item.produto.id, event.target.value)}
-                  type="number"
-                  value={item.quantidade}
-                />
-                <strong className="valor-mono">{moeda.format(precoAtual(item.produto) * item.quantidade)}</strong>
-                <button
-                  className="secondary-button"
-                  onClick={() => removerItem(item.produto.id)}
-                  type="button"
-                >
-                  Tirar
-                </button>
-              </li>
-            ))}
+            {carrinho.map((item) => {
+              const quantidadeItem = limitarQuantidade(item.quantidade, item.produto.estoqueAtual, 0)
+
+              return (
+                <li key={item.produto.id}>
+                  <span>{item.produto.nome}</span>
+                  <input
+                    aria-label={`Quantidade de ${item.produto.nome}`}
+                    className="valor-mono"
+                    inputMode="numeric"
+                    max={item.produto.estoqueAtual}
+                    min="1"
+                    onBlur={() => normalizarItemCarrinho(item.produto.id)}
+                    onChange={(event) => atualizarItemCarrinho(item.produto.id, event.target.value)}
+                    pattern="[0-9]*"
+                    type="text"
+                    value={item.quantidade}
+                  />
+                  <strong className="valor-mono">{moeda.format(precoAtual(item.produto) * quantidadeItem)}</strong>
+                  <button
+                    className="secondary-button"
+                    onClick={() => removerItem(item.produto.id)}
+                    type="button"
+                  >
+                    Tirar
+                  </button>
+                </li>
+              )
+            })}
           </ul>
 
           <button type="button" onClick={() => setCheckoutAberto(true)}>
@@ -299,8 +332,8 @@ function CatalogoPage() {
             <ul className="checkout-list">
               {carrinho.map((item) => (
                 <li key={item.produto.id}>
-                  <span>{item.produto.nome} x <span className="valor-mono">{item.quantidade}</span></span>
-                  <strong className="valor-mono">{moeda.format(precoAtual(item.produto) * item.quantidade)}</strong>
+                  <span>{item.produto.nome} x <span className="valor-mono">{limitarQuantidade(item.quantidade, item.produto.estoqueAtual)}</span></span>
+                  <strong className="valor-mono">{moeda.format(precoAtual(item.produto) * limitarQuantidade(item.quantidade, item.produto.estoqueAtual))}</strong>
                 </li>
               ))}
             </ul>
