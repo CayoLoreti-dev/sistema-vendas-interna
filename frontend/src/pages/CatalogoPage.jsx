@@ -89,6 +89,14 @@ function CatalogoPage() {
     }))
   }
 
+  function prepararQuantidadeProduto(produto, event) {
+    event.target.select()
+
+    if (quantidadeSelecionada(produto) === String(produtoInicialQuantidade)) {
+      atualizarQuantidade(produto, '')
+    }
+  }
+
   function adicionarAoCarrinho(produto) {
     const quantidade = limitarQuantidade(quantidadeSelecionada(produto), produto.estoqueAtual)
     setConfirmacao('')
@@ -133,6 +141,21 @@ function CatalogoPage() {
       return {
         ...item,
         quantidade: limitarQuantidade(item.quantidade, item.produto.estoqueAtual),
+      }
+    }))
+  }
+
+  function prepararQuantidadeCarrinho(produtoId, event) {
+    event.target.select()
+
+    setCarrinho((atual) => atual.map((item) => {
+      if (item.produto.id !== produtoId || String(item.quantidade) !== String(produtoInicialQuantidade)) {
+        return item
+      }
+
+      return {
+        ...item,
+        quantidade: '',
       }
     }))
   }
@@ -233,7 +256,9 @@ function CatalogoPage() {
                         inputMode="numeric"
                         onBlur={() => normalizarQuantidadeProduto(produto)}
                         onChange={(event) => atualizarQuantidade(produto, event.target.value)}
+                        onFocus={(event) => prepararQuantidadeProduto(produto, event)}
                         pattern="[0-9]*"
+                        placeholder="1"
                         type="text"
                         value={quantidadeSelecionada(produto)}
                       />
@@ -291,7 +316,9 @@ function CatalogoPage() {
                     min="1"
                     onBlur={() => normalizarItemCarrinho(item.produto.id)}
                     onChange={(event) => atualizarItemCarrinho(item.produto.id, event.target.value)}
+                    onFocus={(event) => prepararQuantidadeCarrinho(item.produto.id, event)}
                     pattern="[0-9]*"
+                    placeholder="1"
                     type="text"
                     value={item.quantidade}
                   />
