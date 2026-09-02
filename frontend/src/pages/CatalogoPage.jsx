@@ -48,7 +48,7 @@ function CatalogoPage() {
   )
 
   const totalCarrinho = useMemo(() => carrinho.reduce(
-    (total, item) => total + precoAtual(item.produto) * limitarQuantidade(item.quantidade, item.produto.estoqueAtual, 0),
+    (total, item) => total + precoAtual(item.produto) * limitarQuantidade(item.quantidade, item.produto.estoqueAtual),
     0,
   ), [carrinho])
 
@@ -72,7 +72,7 @@ function CatalogoPage() {
   }, [])
 
   function quantidadeSelecionada(produto) {
-    return quantidades[produto.id] ?? String(produtoInicialQuantidade)
+    return quantidades[produto.id] ?? ''
   }
 
   function atualizarQuantidade(produto, valor) {
@@ -85,16 +85,10 @@ function CatalogoPage() {
   function normalizarQuantidadeProduto(produto) {
     setQuantidades((atual) => ({
       ...atual,
-      [produto.id]: String(limitarQuantidade(atual[produto.id], produto.estoqueAtual)),
+      [produto.id]: atual[produto.id]
+        ? String(limitarQuantidade(atual[produto.id], produto.estoqueAtual))
+        : '',
     }))
-  }
-
-  function prepararQuantidadeProduto(produto, event) {
-    event.target.select()
-
-    if (quantidadeSelecionada(produto) === String(produtoInicialQuantidade)) {
-      atualizarQuantidade(produto, '')
-    }
   }
 
   function adicionarAoCarrinho(produto) {
@@ -104,18 +98,21 @@ function CatalogoPage() {
 
     setCarrinho((atual) => {
       const itemExistente = atual.find((item) => item.produto.id === produto.id)
-      const quantidadeAtual = itemExistente?.quantidade || 0
+      const quantidadeAtual = itemExistente
+        ? limitarQuantidade(itemExistente.quantidade, produto.estoqueAtual)
+        : 0
       const novaQuantidade = Math.min(quantidadeAtual + quantidade, produto.estoqueAtual)
+      const quantidadeCarrinho = novaQuantidade === produtoInicialQuantidade ? '' : String(novaQuantidade)
 
       if (itemExistente) {
         return atual.map((item) => (
           item.produto.id === produto.id
-            ? { ...item, produto, quantidade: novaQuantidade }
+            ? { ...item, produto, quantidade: quantidadeCarrinho }
             : item
         ))
       }
 
-      return [...atual, { produto, quantidade: novaQuantidade }]
+      return [...atual, { produto, quantidade: quantidadeCarrinho }]
     })
   }
 
@@ -140,22 +137,9 @@ function CatalogoPage() {
 
       return {
         ...item,
-        quantidade: limitarQuantidade(item.quantidade, item.produto.estoqueAtual),
-      }
-    }))
-  }
-
-  function prepararQuantidadeCarrinho(produtoId, event) {
-    event.target.select()
-
-    setCarrinho((atual) => atual.map((item) => {
-      if (item.produto.id !== produtoId || String(item.quantidade) !== String(produtoInicialQuantidade)) {
-        return item
-      }
-
-      return {
-        ...item,
-        quantidade: '',
+        quantidade: item.quantidade
+          ? limitarQuantidade(item.quantidade, item.produto.estoqueAtual)
+          : '',
       }
     }))
   }
@@ -256,7 +240,6 @@ function CatalogoPage() {
                         inputMode="numeric"
                         onBlur={() => normalizarQuantidadeProduto(produto)}
                         onChange={(event) => atualizarQuantidade(produto, event.target.value)}
-                        onFocus={(event) => prepararQuantidadeProduto(produto, event)}
                         pattern="[0-9]*"
                         placeholder="1"
                         type="text"
@@ -316,7 +299,6 @@ function CatalogoPage() {
                     min="1"
                     onBlur={() => normalizarItemCarrinho(item.produto.id)}
                     onChange={(event) => atualizarItemCarrinho(item.produto.id, event.target.value)}
-                    onFocus={(event) => prepararQuantidadeCarrinho(item.produto.id, event)}
                     pattern="[0-9]*"
                     placeholder="1"
                     type="text"
