@@ -362,7 +362,7 @@ function CatalogoPage() {
             })}
           </ul>
 
-          <button type="button" onClick={abrirCheckout}>
+          <button className="cart-submit" type="button" onClick={abrirCheckout}>
             Finalizar pedido
           </button>
         </aside>
