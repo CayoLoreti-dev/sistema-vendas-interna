@@ -22,7 +22,7 @@ function ConfiguracoesPage() {
     }))
   }
 
-  function carregarArquivo(event) {
+  function carregarArquivo(event, campo) {
     const arquivo = event.target.files?.[0]
 
     if (!arquivo) {
@@ -42,7 +42,7 @@ function ConfiguracoesPage() {
     const reader = new FileReader()
 
     reader.onload = () => {
-      atualizarCampo('imagemUrl', reader.result)
+      atualizarCampo(campo, reader.result)
       setErro('')
       setMensagem('')
     }
@@ -74,47 +74,105 @@ function ConfiguracoesPage() {
     <section className="page-stack">
       <div className="page-heading">
         <p className="eyebrow">Configurações</p>
-        <h1>Aparência da loja</h1>
+        <h1>Configurações da loja</h1>
       </div>
 
       <form className="form-panel" onSubmit={salvar}>
-        <h2>Identidade visual</h2>
+        <section className="settings-section">
+          <div>
+            <p className="eyebrow">Loja e fotos</p>
+            <h2>Identidade visual</h2>
+          </div>
 
-        <div className="settings-preview">
-          <StoreIdentity config={form} />
-        </div>
+          <div className="settings-preview">
+            <StoreIdentity config={form} />
+          </div>
 
-        <div className="form-grid">
-          <label>
-            Nome da loja
-            <input
-              maxLength={40}
-              onChange={(event) => atualizarCampo('nomeLoja', event.target.value)}
-              required
-              type="text"
-              value={form.nomeLoja || ''}
-            />
-          </label>
+          <div className="form-grid">
+            <label>
+              Nome da loja
+              <input
+                maxLength={40}
+                onChange={(event) => atualizarCampo('nomeLoja', event.target.value)}
+                required
+                type="text"
+                value={form.nomeLoja || ''}
+              />
+            </label>
 
-          <label>
-            URL da foto
-            <input
-              onChange={(event) => atualizarCampo('imagemUrl', event.target.value)}
-              placeholder="https://..."
-              type="url"
-              value={form.imagemUrl?.startsWith('data:') ? '' : form.imagemUrl || ''}
-            />
-          </label>
+            <label>
+              URL da foto
+              <input
+                onChange={(event) => atualizarCampo('imagemUrl', event.target.value)}
+                placeholder="https://..."
+                type="url"
+                value={form.imagemUrl?.startsWith('data:') ? '' : form.imagemUrl || ''}
+              />
+            </label>
 
-          <label>
-            Enviar foto
-            <input
-              accept="image/png,image/jpeg,image/webp"
-              onChange={carregarArquivo}
-              type="file"
-            />
-          </label>
-        </div>
+            <label>
+              Enviar foto
+              <input
+                accept="image/png,image/jpeg,image/webp"
+                onChange={(event) => carregarArquivo(event, 'imagemUrl')}
+                type="file"
+              />
+            </label>
+          </div>
+        </section>
+
+        <section className="settings-section">
+          <div>
+            <p className="eyebrow">Pix</p>
+            <h2>Pagamento por Pix</h2>
+            <p className="muted">Configure a chave e o QR Code que aparecem para o cliente ao finalizar a compra.</p>
+          </div>
+
+          <div className="form-grid">
+            <label>
+              Chave Pix
+              <input
+                maxLength={160}
+                onChange={(event) => atualizarCampo('pixChave', event.target.value)}
+                placeholder="CPF, telefone, e-mail ou chave aleatória"
+                type="text"
+                value={form.pixChave || ''}
+              />
+            </label>
+
+            <label>
+              URL do QR Code Pix
+              <input
+                onChange={(event) => atualizarCampo('pixQrCode', event.target.value)}
+                placeholder="https://..."
+                type="url"
+                value={form.pixQrCode?.startsWith('data:') ? '' : form.pixQrCode || ''}
+              />
+            </label>
+
+            <label>
+              Enviar QR Code
+              <input
+                accept="image/png,image/jpeg,image/webp"
+                onChange={(event) => carregarArquivo(event, 'pixQrCode')}
+                type="file"
+              />
+            </label>
+          </div>
+
+          {form.pixQrCode && (
+            <div className="pix-preview">
+              <img alt="QR Code Pix configurado" src={form.pixQrCode} />
+              <button
+                className="secondary-button"
+                onClick={() => atualizarCampo('pixQrCode', '')}
+                type="button"
+              >
+                Remover QR Code
+              </button>
+            </div>
+          )}
+        </section>
 
         <div className="actions">
           {form.imagemUrl && (
@@ -135,15 +193,6 @@ function ConfiguracoesPage() {
 
       {erro && <p className="error">{erro}</p>}
       {mensagem && <p className="success">{mensagem}</p>}
-
-      <section className="page-panel">
-        <h2>Ideia para promoções</h2>
-        <p className="muted">
-          O melhor caminho é adicionar preço promocional por produto, com data de início e fim.
-          No catálogo, o cliente veria o preço antigo riscado e o preço promocional em destaque.
-          No pedido, o sistema salvaria o preço usado no momento da compra, como já faz hoje.
-        </p>
-      </section>
     </section>
   )
 }

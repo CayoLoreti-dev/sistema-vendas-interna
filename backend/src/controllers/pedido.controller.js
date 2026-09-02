@@ -56,6 +56,39 @@ function validarMetodoPagamento(metodoPagamento) {
   return metodoPagamento
 }
 
+function validarComprovantePix(metodoPagamento, dados = {}) {
+  if (metodoPagamento !== 'PIX') {
+    return {
+      comprovantePix: null,
+      comprovantePixNome: null,
+      comprovantePixEnviadoEm: null,
+    }
+  }
+
+  const comprovantePix = String(dados.comprovantePix || '').trim()
+  const comprovantePixNome = String(dados.comprovantePixNome || 'comprovante-pix').trim().slice(0, 120)
+
+  if (!comprovantePix) {
+    throw new PedidoError(400, 'Anexe o comprovante do Pix antes de finalizar o pedido')
+  }
+
+  const comprovanteValido = /^data:image\/(png|jpe?g|webp);base64,[a-z0-9+/=]+$/i.test(comprovantePix)
+
+  if (!comprovanteValido) {
+    throw new PedidoError(400, 'Anexe um comprovante em imagem valida')
+  }
+
+  if (comprovantePix.length > 6_000_000) {
+    throw new PedidoError(400, 'O comprovante precisa ter no maximo 4 MB')
+  }
+
+  return {
+    comprovantePix,
+    comprovantePixNome,
+    comprovantePixEnviadoEm: new Date(),
+  }
+}
+
 function formatarMoeda(valor) {
   return new Intl.NumberFormat('pt-BR', {
     style: 'currency',
@@ -75,9 +108,10 @@ function precoAtualProduto(produto) {
   return produto.preco
 }
 
-async function criarPedidoParaUsuario(usuarioId, itensRecebidos, metodoPagamentoRecebido) {
+async function criarPedidoParaUsuario(usuarioId, itensRecebidos, metodoPagamentoRecebido, dadosPagamento = {}) {
   const itens = validarEAgruparItens(itensRecebidos)
   const metodoPagamento = validarMetodoPagamento(metodoPagamentoRecebido)
+  const comprovantePix = validarComprovantePix(metodoPagamento, dadosPagamento)
 
   return prisma.$transaction(async (tx) => {
     const usuario = await tx.usuario.findUnique({
@@ -122,6 +156,7 @@ async function criarPedidoParaUsuario(usuarioId, itensRecebidos, metodoPagamento
         status: 'FIADO',
         metodoPagamento,
         valorTotal,
+        ...comprovantePix,
       },
     })
 
@@ -177,6 +212,10 @@ async function criarPedido(req, res) {
       req.usuario.id,
       req.body.itens,
       req.body.metodoPagamento,
+      {
+        comprovantePix: req.body.comprovantePix,
+        comprovantePixNome: req.body.comprovantePixNome,
+      },
     )
 
     enviarNotificacaoAdmins({

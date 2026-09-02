@@ -1063,6 +1063,89 @@ tbody tr:hover {
   padding: 16px;
 }
 
+.settings-section,
+.pix-checkout-box,
+.pix-details,
+.order-footer-info {
+  display: grid;
+  gap: 12px;
+}
+
+.settings-section {
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 22px;
+}
+
+.settings-section:last-of-type {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.pix-preview {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.pix-preview img,
+.pix-qr,
+.pix-empty-qr {
+  aspect-ratio: 1;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  width: 132px;
+}
+
+.pix-preview img,
+.pix-qr {
+  background: #fff;
+  object-fit: contain;
+  padding: 8px;
+}
+
+.pix-checkout-box {
+  background: var(--color-surface-soft);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 14px;
+}
+
+.pix-checkout-box h3 {
+  margin: 0;
+}
+
+.pix-payment-grid {
+  align-items: start;
+  display: grid;
+  gap: 14px;
+  grid-template-columns: auto 1fr;
+}
+
+.pix-empty-qr {
+  align-items: center;
+  color: var(--color-text-muted);
+  display: grid;
+  font-size: 0.86rem;
+  font-weight: 700;
+  padding: 10px;
+  text-align: center;
+}
+
+.pix-details strong {
+  overflow-wrap: anywhere;
+}
+
+.proof-link {
+  color: var(--color-accent);
+  font-weight: 760;
+  text-decoration: none;
+}
+
+.proof-link:hover {
+  color: var(--color-accent-hover);
+}
+
 .invoice-total-card,
 .invoice-client {
   padding: 18px;
@@ -1263,6 +1346,7 @@ tbody tr:hover {
 
   .cart-panel li,
   .payment-options,
+  .pix-payment-grid,
   .invoice-add-form,
   .invoice-layout {
     grid-template-columns: 1fr;

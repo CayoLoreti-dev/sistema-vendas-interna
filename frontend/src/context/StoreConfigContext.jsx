@@ -6,6 +6,8 @@ const StoreConfigContext = createContext(null)
 const defaultConfig = {
   nomeLoja: 'VendeMais',
   imagemUrl: '',
+  pixChave: '',
+  pixQrCode: '',
 }
 
 export function StoreConfigProvider({ children }) {
@@ -20,6 +22,8 @@ export function StoreConfigProvider({ children }) {
       setConfig({
         nomeLoja: dados.nomeLoja || defaultConfig.nomeLoja,
         imagemUrl: dados.imagemUrl || '',
+        pixChave: dados.pixChave || '',
+        pixQrCode: dados.pixQrCode || '',
       })
     } catch {
       setConfig(defaultConfig)
@@ -33,6 +37,8 @@ export function StoreConfigProvider({ children }) {
     setConfig({
       nomeLoja: dados.nomeLoja || defaultConfig.nomeLoja,
       imagemUrl: dados.imagemUrl || '',
+      pixChave: dados.pixChave || '',
+      pixQrCode: dados.pixQrCode || '',
     })
     return dados
   }

@@ -3,6 +3,8 @@ const prisma = require('../lib/prisma')
 const CONFIG_DEFAULTS = {
   nomeLoja: 'VendeMais',
   imagemUrl: '',
+  pixChave: '',
+  pixQrCode: '',
 }
 
 function normalizarConfiguracoes(configuracoes) {
@@ -27,16 +29,26 @@ async function obterConfiguracoes(req, res) {
 async function atualizarConfiguracoes(req, res) {
   const nomeLoja = String(req.body.nomeLoja || '').trim()
   const imagemUrl = String(req.body.imagemUrl || '').trim()
+  const pixChave = String(req.body.pixChave || '').trim()
+  const pixQrCode = String(req.body.pixQrCode || '').trim()
 
   if (!nomeLoja || nomeLoja.length > 40) {
     return res.status(400).json({ mensagem: 'Informe um nome de loja com ate 40 caracteres' })
   }
 
-  const imagemValida = /^https?:\/\/.+/i.test(imagemUrl)
-    || /^data:image\/(png|jpe?g|webp);base64,[a-z0-9+/=]+$/i.test(imagemUrl)
+  const imagemValida = (valor) => /^https?:\/\/.+/i.test(valor)
+    || /^data:image\/(png|jpe?g|webp);base64,[a-z0-9+/=]+$/i.test(valor)
 
-  if (imagemUrl && !imagemValida) {
+  if (imagemUrl && !imagemValida(imagemUrl)) {
     return res.status(400).json({ mensagem: 'Informe uma URL ou arquivo de imagem valido' })
+  }
+
+  if (pixChave.length > 160) {
+    return res.status(400).json({ mensagem: 'Informe uma chave Pix com ate 160 caracteres' })
+  }
+
+  if (pixQrCode && !imagemValida(pixQrCode)) {
+    return res.status(400).json({ mensagem: 'Informe uma imagem valida para o QR Code do Pix' })
   }
 
   await prisma.$transaction([
@@ -49,6 +61,16 @@ async function atualizarConfiguracoes(req, res) {
       where: { chave: 'imagemUrl' },
       update: { valor: imagemUrl },
       create: { chave: 'imagemUrl', valor: imagemUrl },
+    }),
+    prisma.configuracao.upsert({
+      where: { chave: 'pixChave' },
+      update: { valor: pixChave },
+      create: { chave: 'pixChave', valor: pixChave },
+    }),
+    prisma.configuracao.upsert({
+      where: { chave: 'pixQrCode' },
+      update: { valor: pixQrCode },
+      create: { chave: 'pixQrCode', valor: pixQrCode },
     }),
   ])
 

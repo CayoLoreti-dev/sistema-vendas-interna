@@ -14,7 +14,7 @@ const moeda = new Intl.NumberFormat('pt-BR', {
 
 function formatarData(data) {
   return new Date(data).toLocaleString('pt-BR', {
-    datéStyle: 'short',
+    dateStyle: 'short',
     timeStyle: 'short',
   })
 }
@@ -137,7 +137,14 @@ function PedidosPage() {
               </ul>
 
               <div className="order-footer">
-                <strong className="valor-mono">{moeda.format(Number(pedido.valorTotal))}</strong>
+                <div className="order-footer-info">
+                  <strong className="valor-mono">{moeda.format(Number(pedido.valorTotal))}</strong>
+                  {pedido.comprovantePix && (
+                    <a className="proof-link" href={pedido.comprovantePix} rel="noreferrer" target="_blank">
+                      Ver comprovante Pix
+                    </a>
+                  )}
+                </div>
                 {pedido.status === 'FIADO' && (
                   <button
                     disabled={pagandoId === pedido.id}

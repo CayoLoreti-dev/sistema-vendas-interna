@@ -96,7 +96,14 @@ function MeuSaldoPage() {
                   </ul>
 
                   <div className="order-footer">
-                    <strong className="valor-mono">{moeda.format(Number(pedido.valorTotal))}</strong>
+                    <div className="order-footer-info">
+                      <strong className="valor-mono">{moeda.format(Number(pedido.valorTotal))}</strong>
+                      {pedido.comprovantePix && (
+                        <a className="proof-link" href={pedido.comprovantePix} rel="noreferrer" target="_blank">
+                          Ver comprovante Pix
+                        </a>
+                      )}
+                    </div>
                   </div>
                 </article>
               ))}

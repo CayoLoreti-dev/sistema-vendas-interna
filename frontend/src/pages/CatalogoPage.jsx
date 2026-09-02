@@ -1,5 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { useStoreConfig } from '../context/StoreConfigContext'
 import { api } from '../services/api'
+
+const LIMITE_COMPROVANTE_MB = 4
 
 const moeda = new Intl.NumberFormat('pt-BR', {
   style: 'currency',
@@ -33,9 +36,12 @@ function precoAtual(produto) {
 
 function CatalogoPage() {
   const checkoutPanelRef = useRef(null)
+  const { config } = useStoreConfig()
   const [produtos, setProdutos] = useState([])
   const [quantidades, setQuantidades] = useState({})
   const [carrinho, setCarrinho] = useState([])
+  const [comprovantePix, setComprovantePix] = useState('')
+  const [comprovantePixNome, setComprovantePixNome] = useState('')
   const [checkoutAberto, setCheckoutAberto] = useState(false)
   const [promocoesAbertas, setPromocoesAbertas] = useState(false)
   const [carregando, setCarregando] = useState(true)
@@ -193,6 +199,48 @@ function CatalogoPage() {
     setCheckoutAberto(true)
   }
 
+  function fecharCheckout() {
+    if (enviando) {
+      return
+    }
+
+    setCheckoutAberto(false)
+    setComprovantePix('')
+    setComprovantePixNome('')
+  }
+
+  function carregarComprovantePix(event) {
+    const arquivo = event.target.files?.[0]
+
+    if (!arquivo) {
+      return
+    }
+
+    if (!arquivo.type.startsWith('image/')) {
+      setErro('Anexe uma imagem do comprovante do Pix.')
+      return
+    }
+
+    if (arquivo.size > LIMITE_COMPROVANTE_MB * 1024 * 1024) {
+      setErro(`O comprovante precisa ter no máximo ${LIMITE_COMPROVANTE_MB} MB.`)
+      return
+    }
+
+    const reader = new FileReader()
+
+    reader.onload = () => {
+      setComprovantePix(reader.result)
+      setComprovantePixNome(arquivo.name)
+      setErro('')
+    }
+
+    reader.onerror = () => {
+      setErro('Não foi possível carregar o comprovante.')
+    }
+
+    reader.readAsDataURL(arquivo)
+  }
+
   async function finalizarPedido(metodoPagamento) {
     setErro('')
     setConfirmacao('')
@@ -209,16 +257,25 @@ function CatalogoPage() {
       return
     }
 
+    if (metodoPagamento === 'PIX' && !comprovantePix) {
+      setErro('Anexe o comprovante do Pix antes de finalizar.')
+      return
+    }
+
     setEnviando(true)
 
     try {
       await api.post('/pedidos', {
         metodoPagamento,
         itens: itensValidos,
+        comprovantePix: metodoPagamento === 'PIX' ? comprovantePix : undefined,
+        comprovantePixNome: metodoPagamento === 'PIX' ? comprovantePixNome : undefined,
       })
 
       setCarrinho([])
       setCheckoutAberto(false)
+      setComprovantePix('')
+      setComprovantePixNome('')
       await carregarProdutos()
 
       if (metodoPagamento === 'FIADO') {
@@ -376,7 +433,7 @@ function CatalogoPage() {
               <button
                 className="secondary-button"
                 disabled={enviando}
-                onClick={() => setCheckoutAberto(false)}
+                onClick={fecharCheckout}
                 type="button"
               >
                 Voltar
@@ -407,6 +464,36 @@ function CatalogoPage() {
                 <strong>Pagar com Pix</strong>
                 <span>Combine o pagamento com a vendedora.</span>
               </button>
+            </div>
+
+            <div className="pix-checkout-box">
+              <div>
+                <p className="eyebrow">Pix</p>
+                <h3>Dados para pagamento</h3>
+                <p className="muted">Envie o Pix para a vendedora e anexe o print do comprovante antes de finalizar.</p>
+              </div>
+
+              <div className="pix-payment-grid">
+                {config.pixQrCode ? (
+                  <img alt="QR Code Pix da loja" className="pix-qr" src={config.pixQrCode} />
+                ) : (
+                  <div className="pix-empty-qr">QR Code Pix não configurado</div>
+                )}
+
+                <div className="pix-details">
+                  <span>Chave Pix</span>
+                  <strong>{config.pixChave || 'Chave Pix não configurada'}</strong>
+                  <label>
+                    Comprovante do Pix
+                    <input
+                      accept="image/png,image/jpeg,image/webp"
+                      onChange={carregarComprovantePix}
+                      type="file"
+                    />
+                  </label>
+                  {comprovantePixNome && <small>Arquivo anexado: {comprovantePixNome}</small>}
+                </div>
+              </div>
             </div>
 
             <ul className="checkout-list">
