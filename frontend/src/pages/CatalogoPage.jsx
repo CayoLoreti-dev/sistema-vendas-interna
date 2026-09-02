@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { api } from '../services/api'
 
 const moeda = new Intl.NumberFormat('pt-BR', {
@@ -32,6 +32,7 @@ function precoAtual(produto) {
 }
 
 function CatalogoPage() {
+  const checkoutPanelRef = useRef(null)
   const [produtos, setProdutos] = useState([])
   const [quantidades, setQuantidades] = useState({})
   const [carrinho, setCarrinho] = useState([])
@@ -70,6 +71,21 @@ function CatalogoPage() {
   useEffect(() => {
     carregarProdutos()
   }, [])
+
+  useEffect(() => {
+    if (!checkoutAberto) {
+      return
+    }
+
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+
+    window.requestAnimationFrame(() => {
+      checkoutPanelRef.current?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      })
+    })
+  }, [checkoutAberto])
 
   function quantidadeSelecionada(produto) {
     return quantidades[produto.id] ?? ''
@@ -146,6 +162,12 @@ function CatalogoPage() {
 
   function removerItem(produtoId) {
     setCarrinho((atual) => atual.filter((item) => item.produto.id !== produtoId))
+  }
+
+  function abrirCheckout() {
+    setErro('')
+    setConfirmacao('')
+    setCheckoutAberto(true)
   }
 
   async function finalizarPedido(metodoPagamento) {
@@ -317,7 +339,7 @@ function CatalogoPage() {
             })}
           </ul>
 
-          <button type="button" onClick={() => setCheckoutAberto(true)}>
+          <button type="button" onClick={abrirCheckout}>
             Finalizar pedido
           </button>
         </aside>
@@ -325,7 +347,7 @@ function CatalogoPage() {
 
       {checkoutAberto && (
         <div className="checkout-backdrop" role="presentation">
-          <section className="checkout-panel" aria-label="Finalizar pedido">
+          <section className="checkout-panel" aria-label="Finalizar pedido" ref={checkoutPanelRef}>
             <div className="section-title">
               <h2>Finalizar pedido</h2>
               <button
