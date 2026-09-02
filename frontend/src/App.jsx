@@ -5,6 +5,7 @@ import { ThemeProvider } from './context/ThemeContext'
 import MaintenanceNotice from './components/MaintenanceNotice'
 import AdminLayout from './layouts/AdminLayout'
 import FuncionarioLayout from './layouts/FuncionarioLayout'
+import AlterarSenhaPage from './pages/AlterarSenhaPage'
 import CatalogoPage from './pages/CatalogoPage'
 import Cadastro from './pages/Cadastro'
 import ConfiguracoesPage from './pages/ConfiguracoesPage'
@@ -78,6 +79,7 @@ function App() {
                 <Route path="pedidos" element={<PedidosPage />} />
                 <Route path="faturas" element={<FaturasPage />} />
                 <Route path="configuracoes" element={<ConfiguracoesPage />} />
+                <Route path="senha" element={<AlterarSenhaPage />} />
               </Route>
               <Route
                 path="/vendedor"
@@ -94,6 +96,7 @@ function App() {
                 <Route path="pedidos" element={<PedidosPage />} />
                 <Route path="faturas" element={<FaturasPage />} />
                 <Route path="configuracoes" element={<ConfiguracoesPage />} />
+                <Route path="senha" element={<AlterarSenhaPage />} />
               </Route>
               <Route
                 path="/funcionario"
@@ -105,6 +108,7 @@ function App() {
               >
                 <Route index element={<CatalogoPage />} />
                 <Route path="saldo" element={<MeuSaldoPage />} />
+                <Route path="senha" element={<AlterarSenhaPage />} />
               </Route>
             </Routes>
           </BrowserRouter>

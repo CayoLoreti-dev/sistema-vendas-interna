@@ -1081,6 +1081,10 @@ tbody tr:hover {
   padding-bottom: 0;
 }
 
+.password-panel {
+  max-width: 760px;
+}
+
 .pix-preview {
   align-items: center;
   display: flex;

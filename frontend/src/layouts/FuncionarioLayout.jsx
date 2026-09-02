@@ -30,6 +30,7 @@ function FuncionarioLayout() {
         <nav className="funcionario-nav sidebar-nav" aria-label="Navegação do funcionário">
           <NavLink to="/funcionario" end>Catálogo</NavLink>
           <NavLink to="/funcionario/saldo">Meu saldo</NavLink>
+          <NavLink to="/funcionario/senha">Alterar senha</NavLink>
         </nav>
 
         <div className="admin-actions sidebar-actions">

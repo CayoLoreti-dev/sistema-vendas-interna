@@ -107,7 +107,33 @@ async function listarUsuarios(req, res) {
   return res.json(usuarios)
 }
 
+async function alterarMinhaSenha(req, res) {
+  const senhaInformada = obterSenha(req)
+
+  if (!senhaInformada) {
+    return res.status(400).json({ mensagem: 'Informe a nova senha' })
+  }
+
+  if (String(senhaInformada).length < 4) {
+    return res.status(400).json({ mensagem: 'A nova senha precisa ter pelo menos 4 caracteres' })
+  }
+
+  const senha = await bcrypt.hash(String(senhaInformada), 10)
+
+  await prisma.usuario.update({
+    where: {
+      id: req.usuario.id,
+    },
+    data: {
+      senha,
+    },
+  })
+
+  return res.json({ mensagem: 'Senha alterada com sucesso' })
+}
+
 module.exports = {
+  alterarMinhaSenha,
   cadastrarFuncionario,
   criarUsuario,
   listarUsuarios,
