@@ -77,6 +77,14 @@ function CatalogoPage() {
       return
     }
 
+    const scrollOptions = { top: 0, left: 0, behavior: 'auto' }
+    const overflowOriginal = document.body.style.overflow
+
+    document.body.style.overflow = 'hidden'
+    document.documentElement.scrollTop = 0
+    document.body.scrollTop = 0
+    window.scrollTo(scrollOptions)
+
     window.scrollTo({ top: 0, behavior: 'smooth' })
 
     window.requestAnimationFrame(() => {
@@ -85,6 +93,18 @@ function CatalogoPage() {
         block: 'start',
       })
     })
+
+    const timer = window.setTimeout(() => {
+      checkoutPanelRef.current?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      })
+    }, 80)
+
+    return () => {
+      window.clearTimeout(timer)
+      document.body.style.overflow = overflowOriginal
+    }
   }, [checkoutAberto])
 
   function quantidadeSelecionada(produto) {
@@ -167,6 +187,9 @@ function CatalogoPage() {
   function abrirCheckout() {
     setErro('')
     setConfirmacao('')
+    document.documentElement.scrollTop = 0
+    document.body.scrollTop = 0
+    window.scrollTo(0, 0)
     setCheckoutAberto(true)
   }
 
@@ -360,15 +383,6 @@ function CatalogoPage() {
               </button>
             </div>
 
-            <ul className="checkout-list">
-              {carrinho.map((item) => (
-                <li key={item.produto.id}>
-                  <span>{item.produto.nome} x <span className="valor-mono">{limitarQuantidade(item.quantidade, item.produto.estoqueAtual)}</span></span>
-                  <strong className="valor-mono">{moeda.format(precoAtual(item.produto) * limitarQuantidade(item.quantidade, item.produto.estoqueAtual))}</strong>
-                </li>
-              ))}
-            </ul>
-
             <div className="checkout-total">
               <span>Total</span>
               <strong className="valor-mono">{moeda.format(totalCarrinho)}</strong>
@@ -394,6 +408,15 @@ function CatalogoPage() {
                 <span>Combine o pagamento com a vendedora.</span>
               </button>
             </div>
+
+            <ul className="checkout-list">
+              {carrinho.map((item) => (
+                <li key={item.produto.id}>
+                  <span>{item.produto.nome} x <span className="valor-mono">{limitarQuantidade(item.quantidade, item.produto.estoqueAtual)}</span></span>
+                  <strong className="valor-mono">{moeda.format(precoAtual(item.produto) * limitarQuantidade(item.quantidade, item.produto.estoqueAtual))}</strong>
+                </li>
+              ))}
+            </ul>
           </section>
         </div>
       )}

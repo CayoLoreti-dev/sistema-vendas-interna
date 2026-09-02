@@ -1224,12 +1224,16 @@ tbody tr:hover {
 
   .checkout-panel {
     gap: 14px;
+    left: 12px;
     margin: 0;
     max-height: calc(100dvh - 24px - env(safe-area-inset-bottom));
+    position: fixed;
+    right: 12px;
+    top: 12px;
   }
 
   .checkout-list {
-    max-height: 22vh;
+    max-height: 18vh;
   }
 
   .cart-panel li,
