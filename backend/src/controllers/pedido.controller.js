@@ -1,4 +1,5 @@
 const { Prisma } = require('@prisma/client')
+const { registrarAuditoria } = require('../lib/auditoria')
 const { enviarNotificacaoAdmins } = require('../lib/push')
 const prisma = require('../lib/prisma')
 
@@ -104,94 +105,168 @@ function precoAtualProduto(produto) {
   return produto.preco
 }
 
-async function criarPedidoParaUsuario(usuarioId, itensRecebidos, metodoPagamentoRecebido, dadosPagamento = {}) {
+function normalizarIdempotencyKey(idempotencyKey) {
+  const chave = String(idempotencyKey || '').trim()
+
+  if (!chave) {
+    return null
+  }
+
+  return chave.slice(0, 120)
+}
+
+async function buscarPedidoIdempotente(idempotencyKey, usuarioId) {
+  const pedido = await prisma.pedido.findUnique({
+    where: {
+      idempotencyKey,
+    },
+    include: pedidoInclude(),
+  })
+
+  if (!pedido) {
+    return null
+  }
+
+  if (pedido.usuarioId !== usuarioId) {
+    throw new PedidoError(409, 'Essa tentativa de pedido ja foi usada em outra conta')
+  }
+
+  return {
+    ...pedido,
+    pedidoJaRegistrado: true,
+  }
+}
+
+async function criarPedidoParaUsuario(
+  usuarioId,
+  itensRecebidos,
+  metodoPagamentoRecebido,
+  dadosPagamento = {},
+  opcoes = {},
+) {
   const itens = validarEAgruparItens(itensRecebidos)
   const metodoPagamento = validarMetodoPagamento(metodoPagamentoRecebido)
   const comprovantePix = validarComprovantePix(metodoPagamento, dadosPagamento)
+  const idempotencyKey = normalizarIdempotencyKey(opcoes.idempotencyKey)
+  const auditoriaUsuarioId = opcoes.auditoriaUsuarioId || usuarioId
 
-  return prisma.$transaction(async (tx) => {
-    const usuario = await tx.usuario.findUnique({
-      where: { id: usuarioId },
-      select: { id: true },
-    })
+  if (idempotencyKey) {
+    const pedidoExistente = await buscarPedidoIdempotente(idempotencyKey, usuarioId)
 
-    if (!usuario) {
-      throw new PedidoError(404, 'Cliente nao encontrado')
+    if (pedidoExistente) {
+      return pedidoExistente
     }
+  }
 
-    const produtos = await tx.produto.findMany({
-      where: {
-        id: {
-          in: itens.map((item) => item.produtoId),
-        },
-      },
-    })
+  try {
+    return await prisma.$transaction(async (tx) => {
+      const usuario = await tx.usuario.findUnique({
+        where: { id: usuarioId },
+        select: { id: true },
+      })
 
-    const produtosPorId = new Map(produtos.map((produto) => [produto.id, produto]))
-
-    for (const item of itens) {
-      const produto = produtosPorId.get(item.produtoId)
-
-      if (!produto) {
-        throw new PedidoError(400, `Produto ${item.produtoId} nao encontrado`)
+      if (!usuario) {
+        throw new PedidoError(404, 'Cliente nao encontrado')
       }
 
-      if (produto.estoqueAtual < item.quantidade) {
-        throw new PedidoError(400, `Estoque insuficiente para o produto ${produto.nome}`)
-      }
-    }
-
-    const valorTotal = itens.reduce((total, item) => {
-      const produto = produtosPorId.get(item.produtoId)
-      return total.add(precoAtualProduto(produto).mul(item.quantidade))
-    }, new Prisma.Decimal(0))
-
-    const pedidoCriado = await tx.pedido.create({
-      data: {
-        usuarioId,
-        status: 'FIADO',
-        metodoPagamento,
-        valorTotal,
-        ...comprovantePix,
-      },
-    })
-
-    for (const item of itens) {
-      const produto = produtosPorId.get(item.produtoId)
-
-      const atualizacao = await tx.produto.updateMany({
+      const produtos = await tx.produto.findMany({
         where: {
-          id: item.produtoId,
-          estoqueAtual: {
-            gte: item.quantidade,
-          },
-        },
-        data: {
-          estoqueAtual: {
-            decrement: item.quantidade,
+          id: {
+            in: itens.map((item) => item.produtoId),
           },
         },
       })
 
-      if (atualizacao.count !== 1) {
-        throw new PedidoError(400, `Estoque insuficiente para o produto ${produto.nome}`)
+      const produtosPorId = new Map(produtos.map((produto) => [produto.id, produto]))
+
+      for (const item of itens) {
+        const produto = produtosPorId.get(item.produtoId)
+
+        if (!produto) {
+          throw new PedidoError(400, `Produto ${item.produtoId} nao encontrado`)
+        }
+
+        if (produto.estoqueAtual < item.quantidade) {
+          throw new PedidoError(400, `Estoque insuficiente para o produto ${produto.nome}`)
+        }
       }
 
-      await tx.itemPedido.create({
+      const valorTotal = itens.reduce((total, item) => {
+        const produto = produtosPorId.get(item.produtoId)
+        return total.add(precoAtualProduto(produto).mul(item.quantidade))
+      }, new Prisma.Decimal(0))
+
+      const pedidoCriado = await tx.pedido.create({
         data: {
-          pedidoId: pedidoCriado.id,
-          produtoId: item.produtoId,
-          quantidade: item.quantidade,
-          precoUnitario: precoAtualProduto(produto),
+          usuarioId,
+          status: 'FIADO',
+          metodoPagamento,
+          valorTotal,
+          idempotencyKey: idempotencyKey || undefined,
+          ...comprovantePix,
         },
       })
+
+      for (const item of itens) {
+        const produto = produtosPorId.get(item.produtoId)
+
+        const atualizacao = await tx.produto.updateMany({
+          where: {
+            id: item.produtoId,
+            estoqueAtual: {
+              gte: item.quantidade,
+            },
+          },
+          data: {
+            estoqueAtual: {
+              decrement: item.quantidade,
+            },
+          },
+        })
+
+        if (atualizacao.count !== 1) {
+          throw new PedidoError(400, `Estoque insuficiente para o produto ${produto.nome}`)
+        }
+
+        await tx.itemPedido.create({
+          data: {
+            pedidoId: pedidoCriado.id,
+            produtoId: item.produtoId,
+            quantidade: item.quantidade,
+            precoUnitario: precoAtualProduto(produto),
+          },
+        })
+      }
+
+      await registrarAuditoria(tx, {
+        usuarioId: auditoriaUsuarioId,
+        acao: 'PEDIDO_CRIADO',
+        entidade: 'Pedido',
+        entidadeId: pedidoCriado.id,
+        detalhes: {
+          usuarioId,
+          metodoPagamento,
+          valorTotal: valorTotal.toString(),
+          itens,
+        },
+      })
+
+      return tx.pedido.findUnique({
+        where: { id: pedidoCriado.id },
+        include: pedidoInclude(),
+      })
+    })
+  } catch (error) {
+    if (error.code === 'P2002' && idempotencyKey) {
+      const pedidoExistente = await buscarPedidoIdempotente(idempotencyKey, usuarioId)
+
+      if (pedidoExistente) {
+        return pedidoExistente
+      }
     }
 
-    return tx.pedido.findUnique({
-      where: { id: pedidoCriado.id },
-      include: pedidoInclude(),
-    })
-  })
+    throw error
+  }
 }
 
 function responderErroPedido(error, res) {
@@ -213,16 +288,22 @@ async function criarPedido(req, res) {
         comprovantePix: req.body.comprovantePix,
         comprovantePixNome: req.body.comprovantePixNome,
       },
+      {
+        idempotencyKey: req.body.idempotencyKey || req.headers['idempotency-key'],
+        auditoriaUsuarioId: req.usuario.id,
+      },
     )
 
-    enviarNotificacaoAdmins({
-      title: 'Novo pedido!',
-      body: `${pedido.usuario.nome} comprou por ${formatarMoeda(pedido.valorTotal)} - ${metodoPagamentoLabel(pedido.metodoPagamento)}`,
-    }).catch((error) => {
-      console.error('Erro ao disparar notificacao de novo pedido', error)
-    })
+    if (!pedido.pedidoJaRegistrado) {
+      enviarNotificacaoAdmins({
+        title: 'Novo pedido!',
+        body: `${pedido.usuario.nome} comprou por ${formatarMoeda(pedido.valorTotal)} - ${metodoPagamentoLabel(pedido.metodoPagamento)}`,
+      }).catch((error) => {
+        console.error('Erro ao disparar notificacao de novo pedido', error)
+      })
+    }
 
-    return res.status(201).json(pedido)
+    return res.status(pedido.pedidoJaRegistrado ? 200 : 201).json(pedido)
   } catch (error) {
     return responderErroPedido(error, res)
   }
@@ -238,9 +319,14 @@ async function criarPedidoAdmin(req, res) {
       req.body.usuarioId,
       req.body.itens,
       req.body.metodoPagamento || 'FIADO',
+      {},
+      {
+        idempotencyKey: req.body.idempotencyKey || req.headers['idempotency-key'],
+        auditoriaUsuarioId: req.usuario.id,
+      },
     )
 
-    return res.status(201).json(pedido)
+    return res.status(pedido.pedidoJaRegistrado ? 200 : 201).json(pedido)
   } catch (error) {
     return responderErroPedido(error, res)
   }
@@ -310,6 +396,17 @@ async function pagarPedido(req, res) {
     include: pedidoInclude(),
   })
 
+  await registrarAuditoria(prisma, {
+    usuarioId: req.usuario.id,
+    acao: 'PEDIDO_PAGO',
+    entidade: 'Pedido',
+    entidadeId: pedidoPago.id,
+    detalhes: {
+      usuarioId: pedidoPago.usuarioId,
+      valorTotal: pedidoPago.valorTotal.toString(),
+    },
+  })
+
   return res.json(pedidoPago)
 }
 
@@ -353,6 +450,18 @@ async function removerItemPedido(req, res) {
 
       await tx.itemPedido.delete({
         where: { id: item.id },
+      })
+
+      await registrarAuditoria(tx, {
+        usuarioId: req.usuario.id,
+        acao: 'ITEM_PEDIDO_REMOVIDO',
+        entidade: 'Pedido',
+        entidadeId: pedidoId,
+        detalhes: {
+          produtoId: item.produtoId,
+          produto: item.produto.nome,
+          quantidade: item.quantidade,
+        },
       })
 
       if (item.pedido.itens.length === 1) {

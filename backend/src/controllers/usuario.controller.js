@@ -1,4 +1,5 @@
 const bcrypt = require('bcryptjs')
+const { registrarAuditoria } = require('../lib/auditoria')
 const prisma = require('../lib/prisma')
 
 function removerSenha(usuario) {
@@ -40,6 +41,18 @@ async function criarUsuario(req, res) {
         telefone,
         senha,
         papel: papelSolicitado,
+        status: 'ATIVO',
+      },
+    })
+
+    await registrarAuditoria(prisma, {
+      usuarioId: req.usuario.id,
+      acao: 'USUARIO_CRIADO',
+      entidade: 'Usuario',
+      entidadeId: usuario.id,
+      detalhes: {
+        papel: usuario.papel,
+        status: usuario.status,
       },
     })
 
@@ -74,6 +87,7 @@ async function cadastrarFuncionario(req, res) {
         telefone,
         senha,
         papel: 'FUNCIONARIO',
+        status: 'ATIVO',
       },
     })
 
@@ -97,6 +111,7 @@ async function listarUsuarios(req, res) {
       nome: true,
       telefone: true,
       papel: true,
+      status: true,
       criadoEm: true,
     },
     orderBy: {
@@ -129,11 +144,81 @@ async function alterarMinhaSenha(req, res) {
     },
   })
 
+  await registrarAuditoria(prisma, {
+    usuarioId: req.usuario.id,
+    acao: 'SENHA_ALTERADA',
+    entidade: 'Usuario',
+    entidadeId: req.usuario.id,
+  })
+
   return res.json({ mensagem: 'Senha alterada com sucesso' })
+}
+
+async function atualizarStatusUsuario(req, res) {
+  const { status } = req.body || {}
+
+  if (!['PENDENTE', 'ATIVO', 'BLOQUEADO'].includes(status)) {
+    return res.status(400).json({ mensagem: 'Status invalido' })
+  }
+
+  const usuarioAlvo = await prisma.usuario.findUnique({
+    where: {
+      id: req.params.id,
+    },
+    select: {
+      id: true,
+      nome: true,
+      papel: true,
+      status: true,
+    },
+  })
+
+  if (!usuarioAlvo) {
+    return res.status(404).json({ mensagem: 'Usuario nao encontrado' })
+  }
+
+  if (usuarioAlvo.id === req.usuario.id && status === 'BLOQUEADO') {
+    return res.status(400).json({ mensagem: 'Voce nao pode bloquear o proprio acesso' })
+  }
+
+  if (req.usuario.papel !== 'ADMIN' && usuarioAlvo.papel !== 'FUNCIONARIO') {
+    return res.status(403).json({ mensagem: 'Somente o master pode alterar esse acesso' })
+  }
+
+  const usuarioAtualizado = await prisma.usuario.update({
+    where: {
+      id: usuarioAlvo.id,
+    },
+    data: {
+      status,
+    },
+    select: {
+      id: true,
+      nome: true,
+      telefone: true,
+      papel: true,
+      status: true,
+      criadoEm: true,
+    },
+  })
+
+  await registrarAuditoria(prisma, {
+    usuarioId: req.usuario.id,
+    acao: 'USUARIO_STATUS_ALTERADO',
+    entidade: 'Usuario',
+    entidadeId: usuarioAtualizado.id,
+    detalhes: {
+      statusAnterior: usuarioAlvo.status,
+      statusNovo: usuarioAtualizado.status,
+    },
+  })
+
+  return res.json(usuarioAtualizado)
 }
 
 module.exports = {
   alterarMinhaSenha,
+  atualizarStatusUsuario,
   cadastrarFuncionario,
   criarUsuario,
   listarUsuarios,

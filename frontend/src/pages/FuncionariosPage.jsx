@@ -15,6 +15,7 @@ function FuncionariosPage() {
   const [form, setForm] = useState(funcionarioInicial)
   const [carregando, setCarregando] = useState(true)
   const [salvando, setSalvando] = useState(false)
+  const [alterandoStatusId, setAlterandoStatusId] = useState(null)
   const [erro, setErro] = useState('')
   const [mensagem, setMensagem] = useState('')
 
@@ -30,6 +31,32 @@ function FuncionariosPage() {
     } finally {
       setCarregando(false)
     }
+  }
+
+  async function alterarStatus(funcionario, status) {
+    setErro('')
+    setMensagem('')
+    setAlterandoStatusId(funcionario.id)
+
+    try {
+      await api.patch(`/usuarios/${funcionario.id}/status`, { status })
+      setMensagem(`Status de ${funcionario.nome} atualizado.`)
+      await carregarFuncionarios()
+    } catch (error) {
+      setErro(error.message || 'Não foi possível alterar o status desse acesso.')
+    } finally {
+      setAlterandoStatusId(null)
+    }
+  }
+
+  function statusLabel(status) {
+    const labels = {
+      ATIVO: 'Ativo',
+      PENDENTE: 'Pendente',
+      BLOQUEADO: 'Bloqueado',
+    }
+
+    return labels[status] || 'Ativo'
   }
 
   useEffect(() => {
@@ -156,7 +183,9 @@ function FuncionariosPage() {
                 <th>Nome</th>
                 <th>Telefone</th>
                 <th>Papel</th>
+                <th>Status</th>
                 <th>Criado em</th>
+                <th>Ações</th>
               </tr>
             </thead>
             <tbody>
@@ -165,7 +194,46 @@ function FuncionariosPage() {
                   <td>{funcionario.nome}</td>
                   <td className="valor-mono">{funcionario.telefone}</td>
                   <td>{funcionario.papel}</td>
+                  <td>
+                    <span className={`status-pill ${funcionario.status?.toLowerCase() || 'ativo'}`}>
+                      {statusLabel(funcionario.status)}
+                    </span>
+                  </td>
                   <td>{new Date(funcionario.criadoEm).toLocaleDateString('pt-BR')}</td>
+                  <td>
+                    <div className="table-actions">
+                      {funcionario.status !== 'ATIVO' && (
+                        <button
+                          className="compact-button secondary-button"
+                          disabled={alterandoStatusId === funcionario.id}
+                          onClick={() => alterarStatus(funcionario, 'ATIVO')}
+                          type="button"
+                        >
+                          Ativar
+                        </button>
+                      )}
+                      {funcionario.status !== 'PENDENTE' && (
+                        <button
+                          className="compact-button secondary-button"
+                          disabled={alterandoStatusId === funcionario.id}
+                          onClick={() => alterarStatus(funcionario, 'PENDENTE')}
+                          type="button"
+                        >
+                          Pendência
+                        </button>
+                      )}
+                      {funcionario.status !== 'BLOQUEADO' && (
+                        <button
+                          className="compact-button danger-button"
+                          disabled={alterandoStatusId === funcionario.id}
+                          onClick={() => alterarStatus(funcionario, 'BLOQUEADO')}
+                          type="button"
+                        >
+                          Bloquear
+                        </button>
+                      )}
+                    </div>
+                  </td>
                 </tr>
               ))}
             </tbody>

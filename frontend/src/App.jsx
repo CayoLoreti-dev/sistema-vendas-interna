@@ -3,9 +3,11 @@ import { AuthProvider, useAuth } from './context/AuthContext'
 import { StoreConfigProvider } from './context/StoreConfigContext'
 import { ThemeProvider } from './context/ThemeContext'
 import MaintenanceNotice from './components/MaintenanceNotice'
+import PwaUpdatePrompt from './components/PwaUpdatePrompt'
 import AdminLayout from './layouts/AdminLayout'
 import FuncionarioLayout from './layouts/FuncionarioLayout'
 import AlterarSenhaPage from './pages/AlterarSenhaPage'
+import AuditoriaPage from './pages/AuditoriaPage'
 import CatalogoPage from './pages/CatalogoPage'
 import Cadastro from './pages/Cadastro'
 import ConfiguracoesPage from './pages/ConfiguracoesPage'
@@ -60,6 +62,7 @@ function App() {
         <StoreConfigProvider>
           <BrowserRouter>
             <MaintenanceNotice />
+            <PwaUpdatePrompt />
             <Routes>
               <Route path="/" element={<HomeRedirect />} />
               <Route path="/login" element={<Login />} />
@@ -79,6 +82,7 @@ function App() {
                 <Route path="pedidos" element={<PedidosPage />} />
                 <Route path="faturas" element={<FaturasPage />} />
                 <Route path="configuracoes" element={<ConfiguracoesPage />} />
+                <Route path="auditoria" element={<AuditoriaPage />} />
                 <Route path="senha" element={<AlterarSenhaPage />} />
               </Route>
               <Route

@@ -11,6 +11,7 @@ const pedidoRoutes = require('./routes/pedido.routes')
 const estoqueRoutes = require('./routes/estoque.routes')
 const pushRoutes = require('./routes/push.routes')
 const configRoutes = require('./routes/config.routes')
+const auditoriaRoutes = require('./routes/auditoria.routes')
 
 const app = express()
 const port = process.env.PORT || 3000
@@ -29,10 +30,11 @@ app.use('/estoque-interno', estoqueRoutes)
 app.use('/push/config', configRoutes)
 app.use('/push', pushRoutes)
 app.use('/config', configRoutes)
+app.use('/auditoria', auditoriaRoutes)
 
 app.use(express.static(frontendDist))
 app.use((req, res, next) => {
-  const isApiRequest = ['/auth', '/usuarios', '/produtos', '/pedidos', '/estoque-interno', '/push', '/config']
+  const isApiRequest = ['/auth', '/usuarios', '/produtos', '/pedidos', '/estoque-interno', '/push', '/config', '/auditoria']
     .some((prefix) => req.path === prefix || req.path.startsWith(`${prefix}/`))
 
   if (req.method !== 'GET' || isApiRequest) {

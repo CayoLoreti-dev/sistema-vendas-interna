@@ -33,17 +33,25 @@ enum TipoCompraEstoque {
   PACOTE
 }
 
+enum StatusUsuario {
+  PENDENTE
+  ATIVO
+  BLOQUEADO
+}
+
 model Usuario {
   id                   String                @id @default(uuid())
   nome                 String
   telefone             String                @unique
   senha                String // hash do PIN
   papel                Papel                 @default(FUNCIONARIO)
+  status               StatusUsuario         @default(ATIVO)
   criadoEm             DateTime              @default(now())
   pedidos              Pedido[]
   pushSubscriptions    PushSubscription[]
   estoquesInternos     EstoqueInterno[]
   movimentacoesEstoque MovimentacaoEstoque[]
+  auditorias           Auditoria[]
 
   @@map("usuarios")
 }
@@ -72,6 +80,7 @@ model Pedido {
   status                  StatusPedido    @default(FIADO)
   metodoPagamento         MetodoPagamento
   valorTotal              Decimal         @db.Decimal(10, 2)
+  idempotencyKey          String?         @unique
   comprovantePix          String?
   comprovantePixNome      String?
   comprovantePixEnviadoEm DateTime?
@@ -80,6 +89,19 @@ model Pedido {
   itens                   ItemPedido[]
 
   @@map("pedidos")
+}
+
+model Auditoria {
+  id         String   @id @default(uuid())
+  usuario    Usuario? @relation(fields: [usuarioId], references: [id])
+  usuarioId  String?
+  acao       String
+  entidade   String
+  entidadeId String?
+  detalhes   Json?
+  criadoEm   DateTime @default(now())
+
+  @@map("auditorias")
 }
 
 model ItemPedido {

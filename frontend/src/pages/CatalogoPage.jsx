@@ -12,6 +12,14 @@ const moeda = new Intl.NumberFormat('pt-BR', {
 
 const produtoInicialQuantidade = 1
 
+function criarIdempotencyKey() {
+  if (window.crypto?.randomUUID) {
+    return window.crypto.randomUUID()
+  }
+
+  return `${Date.now()}-${Math.random().toString(16).slice(2)}`
+}
+
 function limparQuantidade(valor) {
   return String(valor).replace(/\D/g, '')
 }
@@ -43,6 +51,7 @@ function CatalogoPage() {
   const [carrinho, setCarrinho] = useState([])
   const [comprovantePix, setComprovantePix] = useState('')
   const [comprovantePixNome, setComprovantePixNome] = useState('')
+  const [pedidoIdempotencyKey, setPedidoIdempotencyKey] = useState('')
   const [checkoutAberto, setCheckoutAberto] = useState(false)
   const [promocoesAbertas, setPromocoesAbertas] = useState(false)
   const [carregando, setCarregando] = useState(true)
@@ -194,6 +203,7 @@ function CatalogoPage() {
   function abrirCheckout() {
     setErro('')
     setConfirmacao('')
+    setPedidoIdempotencyKey((chaveAtual) => chaveAtual || criarIdempotencyKey())
     document.documentElement.scrollTop = 0
     document.body.scrollTop = 0
     window.scrollTo(0, 0)
@@ -266,7 +276,11 @@ function CatalogoPage() {
     setEnviando(true)
 
     try {
+      const chavePedido = pedidoIdempotencyKey || criarIdempotencyKey()
+      setPedidoIdempotencyKey(chavePedido)
+
       await api.post('/pedidos', {
+        idempotencyKey: chavePedido,
         metodoPagamento,
         itens: itensValidos,
         comprovantePix: metodoPagamento === 'PIX' ? comprovantePix : undefined,
@@ -277,6 +291,7 @@ function CatalogoPage() {
       setCheckoutAberto(false)
       setComprovantePix('')
       setComprovantePixNome('')
+      setPedidoIdempotencyKey('')
       await carregarProdutos()
 
       if (metodoPagamento === 'FIADO') {

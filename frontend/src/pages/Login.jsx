@@ -23,8 +23,8 @@ function Login() {
       navigate(auth.usuario.papel === 'ADMIN' ? '/admin' : auth.usuario.papel === 'VENDEDOR' ? '/vendedor' : '/funcionario', {
         replace: true,
       })
-    } catch {
-      setErro('Telefone ou senha inválidos')
+    } catch (error) {
+      setErro(error.message || 'Telefone ou senha inválidos')
     } finally {
       setCarregando(false)
     }
