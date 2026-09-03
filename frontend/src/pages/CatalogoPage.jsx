@@ -297,7 +297,7 @@ function CatalogoPage() {
         <h1>Escolha seus produtos</h1>
       </div>
 
-      {erro && <p className="error">{erro}</p>}
+      {erro && !checkoutAberto && <p className="error">{erro}</p>}
       {confirmacao && <p className="success">{confirmacao}</p>}
 
       {carregando ? (
@@ -419,10 +419,21 @@ function CatalogoPage() {
             })}
           </ul>
 
-          <button className="cart-submit" type="button" onClick={abrirCheckout}>
-            Finalizar pedido
-          </button>
         </aside>
+      )}
+
+      {carrinho.length > 0 && !checkoutAberto && (
+        <div className="cart-checkout-dock" role="region" aria-label="Resumo do pedido">
+          <div className="cart-checkout-dock-content">
+            <div className="cart-checkout-summary">
+              <small>{carrinho.length} {carrinho.length === 1 ? 'produto' : 'produtos'}</small>
+              <strong className="valor-mono">{moeda.format(totalCarrinho)}</strong>
+            </div>
+            <button className="cart-submit" type="button" onClick={abrirCheckout}>
+              Finalizar pedido
+            </button>
+          </div>
+        </div>
       )}
 
       {checkoutAberto && (
@@ -444,6 +455,8 @@ function CatalogoPage() {
               <span>Total</span>
               <strong className="valor-mono">{moeda.format(totalCarrinho)}</strong>
             </div>
+
+            {erro && <p className="error" role="alert">{erro}</p>}
 
             <div className="payment-options">
               <button

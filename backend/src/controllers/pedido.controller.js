@@ -58,11 +58,7 @@ function validarMetodoPagamento(metodoPagamento) {
 
 function validarComprovantePix(metodoPagamento, dados = {}) {
   if (metodoPagamento !== 'PIX') {
-    return {
-      comprovantePix: null,
-      comprovantePixNome: null,
-      comprovantePixEnviadoEm: null,
-    }
+    return {}
   }
 
   const comprovantePix = String(dados.comprovantePix || '').trim()
@@ -203,6 +199,7 @@ function responderErroPedido(error, res) {
     return res.status(error.status).json({ mensagem: error.mensagem })
   }
 
+  console.error('Erro inesperado ao criar pedido:', error)
   return res.status(500).json({ mensagem: 'Erro ao criar pedido' })
 }
 
