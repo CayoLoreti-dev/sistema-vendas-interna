@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useStoreConfig } from '../context/StoreConfigContext'
 import { api } from '../services/api'
 
@@ -422,7 +423,7 @@ function CatalogoPage() {
         </aside>
       )}
 
-      {carrinho.length > 0 && !checkoutAberto && (
+      {carrinho.length > 0 && !checkoutAberto && createPortal(
         <div className="cart-checkout-dock" role="region" aria-label="Resumo do pedido">
           <div className="cart-checkout-dock-content">
             <div className="cart-checkout-summary">
@@ -433,10 +434,11 @@ function CatalogoPage() {
               Finalizar pedido
             </button>
           </div>
-        </div>
+        </div>,
+        document.body,
       )}
 
-      {checkoutAberto && (
+      {checkoutAberto && createPortal(
         <div className="checkout-backdrop" role="presentation">
           <section className="checkout-panel" aria-label="Finalizar pedido" ref={checkoutPanelRef}>
             <div className="section-title">
@@ -518,7 +520,8 @@ function CatalogoPage() {
               ))}
             </ul>
           </section>
-        </div>
+        </div>,
+        document.body,
       )}
     </section>
   )
