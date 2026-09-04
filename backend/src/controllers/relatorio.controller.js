@@ -54,7 +54,17 @@ function pedidoIncludeRelatorio() {
   }
 }
 
-function montarResumo(pedidos) {
+function custoMedio(custosPorProduto, produtoId) {
+  const custo = custosPorProduto.get(produtoId)
+
+  if (!custo || custo.quantidade <= 0) {
+    return 0
+  }
+
+  return custo.totalPago / custo.quantidade
+}
+
+function montarResumo(pedidos, custosPorProduto = new Map()) {
   const produtosPorId = new Map()
 
   const totais = pedidos.reduce((acumulado, pedido) => {
@@ -77,17 +87,27 @@ function montarResumo(pedidos) {
 
     for (const item of pedido.itens) {
       const subtotal = Number(item.precoUnitario) * item.quantidade
+      const custoUnitarioEstimado = custoMedio(custosPorProduto, item.produtoId)
+      const custoTotalEstimado = custoUnitarioEstimado * item.quantidade
+      const lucroEstimado = subtotal - custoTotalEstimado
       const produtoAtual = produtosPorId.get(item.produtoId) || {
         produtoId: item.produtoId,
         nome: item.produto.nome,
         categoria: item.produto.categoria,
         quantidade: 0,
         total: 0,
+        custoMedio: custoUnitarioEstimado,
+        custoTotal: 0,
+        lucro: 0,
       }
 
       produtoAtual.quantidade += item.quantidade
       produtoAtual.total += subtotal
+      produtoAtual.custoTotal += custoTotalEstimado
+      produtoAtual.lucro += lucroEstimado
       acumulado.totalItens += item.quantidade
+      acumulado.custoEstimado += custoTotalEstimado
+      acumulado.lucroEstimado += lucroEstimado
       produtosPorId.set(item.produtoId, produtoAtual)
     }
 
@@ -100,13 +120,58 @@ function montarResumo(pedidos) {
     totalFiado: 0,
     totalPedidos: 0,
     totalItens: 0,
+    custoEstimado: 0,
+    lucroEstimado: 0,
   })
+
+  totais.margemLucro = totais.totalVendido > 0
+    ? (totais.lucroEstimado / totais.totalVendido) * 100
+    : 0
 
   return {
     totais,
     produtos: Array.from(produtosPorId.values()).sort((a, b) => b.quantidade - a.quantidade),
     pedidos,
   }
+}
+
+async function buscarCustosMedios(produtoIds) {
+  if (produtoIds.length === 0) {
+    return new Map()
+  }
+
+  const entradas = await prisma.movimentacaoEstoque.findMany({
+    where: {
+      tipo: 'ENTRADA',
+      produtoId: {
+        in: produtoIds,
+      },
+      precoPago: {
+        not: null,
+      },
+      quantidade: {
+        gt: 0,
+      },
+    },
+    select: {
+      produtoId: true,
+      quantidade: true,
+      precoPago: true,
+    },
+  })
+
+  return entradas.reduce((custos, entrada) => {
+    const atual = custos.get(entrada.produtoId) || {
+      quantidade: 0,
+      totalPago: 0,
+    }
+
+    atual.quantidade += entrada.quantidade
+    atual.totalPago += Number(entrada.precoPago)
+    custos.set(entrada.produtoId, atual)
+
+    return custos
+  }, new Map())
 }
 
 async function buscarPedidosPeriodo(periodo) {
@@ -132,11 +197,13 @@ async function fechamento(req, res) {
   }
 
   const pedidos = await buscarPedidosPeriodo(periodo)
+  const produtoIds = [...new Set(pedidos.flatMap((pedido) => pedido.itens.map((item) => item.produtoId)))]
+  const custosPorProduto = await buscarCustosMedios(produtoIds)
 
   return res.json({
     inicio: periodo.inicio,
     fim: periodo.fim,
-    ...montarResumo(pedidos),
+    ...montarResumo(pedidos, custosPorProduto),
   })
 }
 
@@ -156,6 +223,8 @@ async function fechamentoCsv(req, res) {
   }
 
   const pedidos = await buscarPedidosPeriodo(periodo)
+  const produtoIds = [...new Set(pedidos.flatMap((pedido) => pedido.itens.map((item) => item.produtoId)))]
+  const custosPorProduto = await buscarCustosMedios(produtoIds)
   const linhas = [
     linhaCsv([
       'Data',
@@ -166,7 +235,9 @@ async function fechamentoCsv(req, res) {
       'Produto',
       'Quantidade',
       'Preco unitario',
+      'Custo unitario estimado',
       'Subtotal',
+      'Lucro estimado',
       'Total pedido',
     ]),
   ]
@@ -174,6 +245,8 @@ async function fechamentoCsv(req, res) {
   for (const pedido of pedidos) {
     for (const item of pedido.itens) {
       const subtotal = Number(item.precoUnitario) * item.quantidade
+      const custoUnitarioEstimado = custoMedio(custosPorProduto, item.produtoId)
+      const lucroEstimado = subtotal - custoUnitarioEstimado * item.quantidade
 
       linhas.push(linhaCsv([
         pedido.criadoEm.toISOString(),
@@ -184,7 +257,9 @@ async function fechamentoCsv(req, res) {
         item.produto.nome,
         item.quantidade,
         Number(item.precoUnitario).toFixed(2),
+        custoUnitarioEstimado.toFixed(2),
         subtotal.toFixed(2),
+        lucroEstimado.toFixed(2),
         Number(pedido.valorTotal).toFixed(2),
       ]))
     }

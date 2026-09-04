@@ -5,6 +5,7 @@ dist/
 build/
 .DS_Store
 *.log
+backend/uploads/
 frontend/dev-dist/
 ACESSOS-LOCAIS.txt
 .deploy_promocoes_only/

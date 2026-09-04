@@ -233,7 +233,7 @@ function EstoqueInternoPage() {
           </label>
 
           <label>
-            Preço pago
+            Preço pago total
             <input
               className="valor-mono"
               min="0.01"

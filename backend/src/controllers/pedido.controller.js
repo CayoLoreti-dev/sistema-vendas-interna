@@ -1,5 +1,6 @@
 const { Prisma } = require('@prisma/client')
 const { registrarAuditoria } = require('../lib/auditoria')
+const { salvarComprovantePix } = require('../lib/comprovantePix')
 const { enviarNotificacaoAdmins } = require('../lib/push')
 const prisma = require('../lib/prisma')
 
@@ -57,7 +58,7 @@ function validarMetodoPagamento(metodoPagamento) {
   return metodoPagamento
 }
 
-function validarComprovantePix(metodoPagamento, dados = {}) {
+async function validarComprovantePix(metodoPagamento, dados = {}) {
   if (metodoPagamento !== 'PIX') {
     return {}
   }
@@ -79,8 +80,14 @@ function validarComprovantePix(metodoPagamento, dados = {}) {
     throw new PedidoError(400, 'O comprovante precisa ter no maximo 4 MB')
   }
 
+  const comprovantePixUrl = await salvarComprovantePix(comprovantePix)
+
+  if (!comprovantePixUrl) {
+    throw new PedidoError(400, 'Anexe um comprovante em imagem valida')
+  }
+
   return {
-    comprovantePix,
+    comprovantePix: comprovantePixUrl,
     comprovantePixNome,
     comprovantePixEnviadoEm: new Date(),
   }
@@ -146,7 +153,7 @@ async function criarPedidoParaUsuario(
 ) {
   const itens = validarEAgruparItens(itensRecebidos)
   const metodoPagamento = validarMetodoPagamento(metodoPagamentoRecebido)
-  const comprovantePix = validarComprovantePix(metodoPagamento, dadosPagamento)
+  const comprovantePix = await validarComprovantePix(metodoPagamento, dadosPagamento)
   const idempotencyKey = normalizarIdempotencyKey(opcoes.idempotencyKey)
   const auditoriaUsuarioId = opcoes.auditoriaUsuarioId || usuarioId
 

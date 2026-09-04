@@ -77,6 +77,9 @@ function FechamentoPage() {
     totalFiado: 0,
     totalPedidos: 0,
     totalItens: 0,
+    custoEstimado: 0,
+    lucroEstimado: 0,
+    margemLucro: 0,
   }
 
   return (
@@ -131,6 +134,18 @@ function FechamentoPage() {
           <strong className="valor-mono">{moeda.format(totais.totalPix)}</strong>
           <p>Fiado: <span className="valor-mono">{moeda.format(totais.totalFiado)}</span></p>
         </section>
+
+        <section className="summary-card">
+          <span>Custo estimado</span>
+          <strong className="valor-mono">{moeda.format(totais.custoEstimado)}</strong>
+          <p>Calculado pelo custo médio das entradas do estoque.</p>
+        </section>
+
+        <section className={`summary-card ${totais.lucroEstimado > 0 ? 'positive-panel' : ''}`}>
+          <span>Lucro estimado</span>
+          <strong className="valor-mono">{moeda.format(totais.lucroEstimado)}</strong>
+          <p>Margem: <span className="valor-mono">{Number(totais.margemLucro).toFixed(1)}%</span></p>
+        </section>
       </div>
 
       <section className="table-panel">
@@ -150,6 +165,8 @@ function FechamentoPage() {
                 <th>Categoria</th>
                 <th>Quantidade</th>
                 <th>Total</th>
+                <th>Custo estimado</th>
+                <th>Lucro estimado</th>
               </tr>
             </thead>
             <tbody>
@@ -159,6 +176,8 @@ function FechamentoPage() {
                   <td>{produto.categoria || '-'}</td>
                   <td className="valor-mono">{produto.quantidade} un.</td>
                   <td className="valor-mono">{moeda.format(produto.total)}</td>
+                  <td className="valor-mono">{moeda.format(produto.custoTotal)}</td>
+                  <td className="valor-mono">{moeda.format(produto.lucro)}</td>
                 </tr>
               ))}
             </tbody>

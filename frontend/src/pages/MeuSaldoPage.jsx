@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { api } from '../services/api'
+import { api, assetUrl } from '../services/api'
 
 const moeda = new Intl.NumberFormat('pt-BR', {
   style: 'currency',
@@ -99,7 +99,7 @@ function MeuSaldoPage() {
                     <div className="order-footer-info">
                       <strong className="valor-mono">{moeda.format(Number(pedido.valorTotal))}</strong>
                       {pedido.comprovantePix && (
-                        <a className="proof-link" href={pedido.comprovantePix} rel="noreferrer" target="_blank">
+                        <a className="proof-link" href={assetUrl(pedido.comprovantePix)} rel="noreferrer" target="_blank">
                           Ver comprovante Pix
                         </a>
                       )}
