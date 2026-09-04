@@ -1,14 +1,6 @@
 const API_URL = import.meta.env.VITE_API_URL
 const AUTH_STORAGE_KEY = 'sistema-vendas:auth'
 
-function apiOrigin() {
-  try {
-    return new URL(API_URL, window.location.origin).origin
-  } catch {
-    return window.location.origin
-  }
-}
-
 function assetUrl(path) {
   if (!path) {
     return ''
@@ -18,7 +10,7 @@ function assetUrl(path) {
     return path
   }
 
-  return `${apiOrigin()}${path.startsWith('/') ? path : `/${path}`}`
+  return `${String(API_URL).replace(/\/$/, '')}${path.startsWith('/') ? path : `/${path}`}`
 }
 
 function getStoredToken() {
