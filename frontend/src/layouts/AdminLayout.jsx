@@ -131,6 +131,7 @@ function AdminLayout() {
           <NavLink to={`${basePath}/funcionarios`}>Clientes</NavLink>
           <NavLink to={`${basePath}/pedidos`}>Pedidos</NavLink>
           <NavLink to={`${basePath}/faturas`}>Faturas</NavLink>
+          <NavLink to={`${basePath}/fechamento`}>Fechamento</NavLink>
           <NavLink to={`${basePath}/configuracoes`}>Configurações da loja</NavLink>
           {isMaster && <NavLink to={`${basePath}/auditoria`}>Auditoria</NavLink>}
           <NavLink to={`${basePath}/senha`}>Alterar senha</NavLink>

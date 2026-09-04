@@ -13,6 +13,7 @@
 .auth-card,
 .home-page section,
 .page-panel,
+.filter-panel,
 .form-panel,
 .table-panel,
 .product-card,
@@ -468,6 +469,7 @@ button:disabled {
 }
 
 .page-panel,
+.filter-panel,
 .form-panel,
 .table-panel,
 .product-card,
@@ -494,10 +496,15 @@ button:disabled {
   margin: 0;
 }
 
-.form-grid {
+.form-grid,
+.filter-panel {
   display: grid;
   gap: 16px;
   grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+}
+
+.filter-panel {
+  align-items: end;
 }
 
 .actions,

@@ -59,6 +59,40 @@ async function request(path, options = {}) {
   return data
 }
 
+async function download(path, filename) {
+  const token = getStoredToken()
+  const headers = new Headers()
+
+  if (token) {
+    headers.set('Authorization', `Bearer ${token}`)
+  }
+
+  const response = await fetch(`${API_URL}${path}`, {
+    headers,
+  })
+
+  if (response.status === 401) {
+    clearSessionAndRedirect()
+    throw new Error('Sessao expirada')
+  }
+
+  if (!response.ok) {
+    const data = await response.json().catch(() => null)
+    throw new Error(data?.mensagem || 'Erro no download')
+  }
+
+  const blob = await response.blob()
+  const url = window.URL.createObjectURL(blob)
+  const link = document.createElement('a')
+
+  link.href = url
+  link.download = filename
+  document.body.appendChild(link)
+  link.click()
+  link.remove()
+  window.URL.revokeObjectURL(url)
+}
+
 export const api = {
   get: (path) => request(path),
   post: (path, body) => request(path, {
@@ -76,6 +110,7 @@ export const api = {
   delete: (path) => request(path, {
     method: 'DELETE',
   }),
+  download,
 }
 
 export { AUTH_STORAGE_KEY }
