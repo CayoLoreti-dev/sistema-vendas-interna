@@ -131,6 +131,31 @@ function EstoqueInternoPage() {
     }
   }
 
+  async function colocarTudoParaVenda(item) {
+    const confirmou = window.confirm(`Colocar todas as ${item.quantidade} unidade(s) de "${item.produto.nome}" para venda?`)
+
+    if (!confirmou) {
+      return
+    }
+
+    setErro('')
+    setMensagem('')
+    setSalvandoVenda(true)
+
+    try {
+      await api.post(`/estoque-interno/${item.id}/colocar-venda`, {
+        quantidade: item.quantidade,
+      })
+
+      setMensagem(`${item.produto.nome} colocado para venda.`)
+      await carregarDados()
+    } catch (error) {
+      setErro(error.message || 'Não foi possível colocar esse produto para venda.')
+    } finally {
+      setSalvandoVenda(false)
+    }
+  }
+
   async function abrirHistorico(item) {
     setHistorico({ item, movimentacoes: [] })
     setCarregandoHistorico(true)
@@ -155,7 +180,7 @@ function EstoqueInternoPage() {
     <section className="page-stack">
       <div className="page-heading">
         <p className="eyebrow">Meu estoque</p>
-        <h1>Estoque interno</h1>
+        <h1>Estoque da vendedora</h1>
       </div>
 
       {isMaster && (
@@ -177,7 +202,7 @@ function EstoqueInternoPage() {
       )}
 
       <form className="form-panel" onSubmit={adicionarEntrada}>
-        <h2>Cadastrar produto no estoque</h2>
+        <h2>Dar entrada no estoque guardado</h2>
         <div className="form-grid">
           {isMaster && (
             <label>
@@ -286,7 +311,7 @@ function EstoqueInternoPage() {
           )}
         </div>
         <button disabled={salvandoEntrada || produtos.length === 0} type="submit">
-          {salvandoEntrada ? 'Salvando...' : 'Cadastrar no estoque'}
+          {salvandoEntrada ? 'Salvando...' : 'Salvar entrada'}
         </button>
       </form>
 
@@ -304,8 +329,8 @@ function EstoqueInternoPage() {
               <tr>
                 {isMaster && <th>Vendedor</th>}
                 <th>Produto</th>
-                <th>Estoque interno</th>
-                <th>À venda</th>
+                <th>Guardado</th>
+                <th>Visível para clientes</th>
                 <th>Ações</th>
               </tr>
             </thead>
@@ -323,7 +348,15 @@ function EstoqueInternoPage() {
                         onClick={() => setVenda({ item, quantidade: '' })}
                         type="button"
                       >
-                        Colocar pra venda
+                        Colocar quantidade
+                      </button>
+                      <button
+                        className="secondary-button"
+                        disabled={item.quantidade <= 0 || salvandoVenda}
+                        onClick={() => colocarTudoParaVenda(item)}
+                        type="button"
+                      >
+                        Colocar tudo à venda
                       </button>
                       <button className="secondary-button" onClick={() => abrirHistorico(item)} type="button">
                         Histórico

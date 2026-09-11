@@ -215,7 +215,7 @@ function ProdutosPage() {
           </label>
 
           <label>
-            Estoque inicial
+            Estoque visível para clientes
             <input
               className="valor-mono"
               min="0"
