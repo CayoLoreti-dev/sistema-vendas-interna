@@ -152,8 +152,21 @@ function ProdutosPage() {
     }
   }
 
+  async function ativarProduto(produto) {
+    setErro('')
+    setMensagem('')
+
+    try {
+      await api.patch(`/produtos/${produto.id}/ativar`)
+      setMensagem('Produto ativado com sucesso.')
+      await carregarProdutos()
+    } catch (error) {
+      setErro(error.message || 'Não foi possível ativar o produto.')
+    }
+  }
+
   async function excluirProduto(produto) {
-    const confirmou = window.confirm(`Excluir o produto "${produto.nome}"?`)
+    const confirmou = window.confirm(`Remover "${produto.nome}" da venda? Se ele tiver histórico, será inativado para preservar os registros.`)
 
     if (!confirmou) {
       return
@@ -164,10 +177,10 @@ function ProdutosPage() {
 
     try {
       await api.delete(`/produtos/${produto.id}`)
-      setMensagem('Produto excluído com sucesso.')
+      setMensagem('Produto removido da venda com sucesso.')
       await carregarProdutos()
-    } catch {
-      setErro('Não foi possível excluir o produto.')
+    } catch (error) {
+      setErro(error.message || 'Não foi possível remover o produto.')
     }
   }
 
@@ -256,6 +269,7 @@ function ProdutosPage() {
                 <th>Categoria</th>
                 <th>Preço</th>
                 <th>Promoção</th>
+                <th>Status</th>
                 <th>Estoque</th>
                 <th>Ações</th>
               </tr>
@@ -280,21 +294,37 @@ function ProdutosPage() {
                       <span className="muted">Sem promoção</span>
                     )}
                   </td>
+                  <td>
+                    <span className={`status-pill ${produto.ativo === false ? 'bloqueado' : 'ativo'}`}>
+                      {produto.ativo === false ? 'Inativo' : 'Ativo'}
+                    </span>
+                  </td>
                   <td className="valor-mono">{produto.estoqueAtual}</td>
                   <td>
                     <div className="row-actions">
-                      <button type="button" onClick={() => editarProduto(produto)}>Editar</button>
-                      <button className="secondary-button" type="button" onClick={() => abrirPromocao(produto)}>
-                        {produto.promocaoAtiva ? 'Alterar promoção' : 'Criar promoção'}
-                      </button>
-                      {produto.promocaoAtiva && (
-                        <button className="secondary-button" type="button" onClick={() => removerPromocao(produto)}>
-                          Tirar promoção
+                      {produto.ativo === false ? (
+                        <button type="button" onClick={() => ativarProduto(produto)}>Reativar</button>
+                      ) : (
+                        <>
+                          <button type="button" onClick={() => editarProduto(produto)}>Editar</button>
+                          <button className="secondary-button" type="button" onClick={() => abrirPromocao(produto)}>
+                            {produto.promocaoAtiva ? 'Alterar promoção' : 'Criar promoção'}
+                          </button>
+                          {produto.promocaoAtiva && (
+                            <button className="secondary-button" type="button" onClick={() => removerPromocao(produto)}>
+                              Tirar promoção
+                            </button>
+                          )}
+                          <button className="danger-button" type="button" onClick={() => excluirProduto(produto)}>
+                            Remover da venda
+                          </button>
+                        </>
+                      )}
+                      {produto.ativo === false && (
+                        <button className="danger-button" type="button" onClick={() => excluirProduto(produto)}>
+                          Excluir
                         </button>
                       )}
-                      <button className="danger-button" type="button" onClick={() => excluirProduto(produto)}>
-                        Excluir
-                      </button>
                     </div>
                   </td>
                 </tr>

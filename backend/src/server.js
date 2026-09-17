@@ -13,6 +13,8 @@ const pushRoutes = require('./routes/push.routes')
 const configRoutes = require('./routes/config.routes')
 const auditoriaRoutes = require('./routes/auditoria.routes')
 const relatorioRoutes = require('./routes/relatorio.routes')
+const healthRoutes = require('./routes/health.routes')
+const { requestLogger } = require('./middlewares/request-logger.middleware')
 
 const app = express()
 const port = process.env.PORT || 3000
@@ -24,7 +26,9 @@ app.use(helmet())
 app.use(cors({ origin: process.env.CORS_ORIGIN }))
 app.use(express.json({ limit: '8mb' }))
 app.use('/uploads', express.static(uploadsDir))
+app.use(requestLogger)
 
+app.use('/health', healthRoutes)
 app.use('/auth', authRoutes)
 app.use('/usuarios', usuarioRoutes)
 app.use('/produtos', produtoRoutes)
@@ -38,7 +42,7 @@ app.use('/relatorios', relatorioRoutes)
 
 app.use(express.static(frontendDist))
 app.use((req, res, next) => {
-  const isApiRequest = ['/auth', '/usuarios', '/produtos', '/pedidos', '/estoque-interno', '/push', '/config', '/auditoria', '/relatorios']
+  const isApiRequest = ['/health', '/auth', '/usuarios', '/produtos', '/pedidos', '/estoque-interno', '/push', '/config', '/auditoria', '/relatorios']
     .some((prefix) => req.path === prefix || req.path.startsWith(`${prefix}/`))
 
   if (req.method !== 'GET' || isApiRequest) {

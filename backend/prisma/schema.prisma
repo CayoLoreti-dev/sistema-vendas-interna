@@ -63,6 +63,7 @@ model Produto {
   preco                Decimal               @db.Decimal(10, 2)
   precoPromocional     Decimal?              @db.Decimal(10, 2)
   promocaoAtiva        Boolean               @default(false)
+  ativo                Boolean               @default(true)
   estoqueAtual         Int                   @default(0)
   criadoEm             DateTime              @default(now())
   atualizadoEm         DateTime              @updatedAt
