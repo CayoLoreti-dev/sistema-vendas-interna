@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { api, assetUrl } from '../services/api'
 
 const filtros = [
   { label: 'Todos', value: '' },
-  { label: 'Em aberto (fiado)', value: 'FIADO' },
+  { label: 'Em aberto', value: 'FIADO' },
   { label: 'Pago', value: 'PAGO' },
 ]
 
@@ -29,30 +29,45 @@ function metodoLabel(metodoPagamento) {
 
 function PedidosPage() {
   const [status, setStatus] = useState('')
+  const [metodoPagamento, setMetodoPagamento] = useState('')
+  const [busca, setBusca] = useState('')
+  const [inicio, setInicio] = useState('')
+  const [fim, setFim] = useState('')
   const [pedidos, setPedidos] = useState([])
   const [carregando, setCarregando] = useState(true)
   const [pagandoId, setPagandoId] = useState(null)
   const [erro, setErro] = useState('')
   const [mensagem, setMensagem] = useState('')
 
-  async function carregarPedidos(statusSelecionado = status) {
+  const query = useMemo(() => {
+    const params = new URLSearchParams()
+
+    if (status) params.set('status', status)
+    if (metodoPagamento) params.set('metodoPagamento', metodoPagamento)
+    if (busca.trim()) params.set('busca', busca.trim())
+    if (inicio) params.set('inicio', inicio)
+    if (fim) params.set('fim', fim)
+
+    return params.toString()
+  }, [busca, fim, inicio, metodoPagamento, status])
+
+  const carregarPedidos = useCallback(async () => {
     setErro('')
     setCarregando(true)
 
     try {
-      const query = statusSelecionado ? `?status=${statusSelecionado}` : ''
-      const dados = await api.get(`/pedidos${query}`)
+      const dados = await api.get(`/pedidos${query ? `?${query}` : ''}`)
       setPedidos(dados)
-    } catch {
-      setErro('Não foi possível carregar os pedidos. Tente novamente em instantes.')
+    } catch (error) {
+      setErro(error.message || 'Não foi possível carregar os pedidos. Tente novamente em instantes.')
     } finally {
       setCarregando(false)
     }
-  }
+  }, [query])
 
   useEffect(() => {
-    carregarPedidos(status)
-  }, [status])
+    carregarPedidos()
+  }, [carregarPedidos])
 
   async function marcarComoPago(pedido) {
     const confirmou = window.confirm(`Marcar o pedido de ${pedido.usuario.nome} como pago?`)
@@ -68,12 +83,20 @@ function PedidosPage() {
     try {
       await api.patch(`/pedidos/${pedido.id}/pagar`)
       setMensagem('Pedido marcado como pago.')
-      await carregarPedidos(status)
-    } catch {
-      setErro('Não foi possível marcar esse pedido como pago.')
+      await carregarPedidos()
+    } catch (error) {
+      setErro(error.message || 'Não foi possível marcar esse pedido como pago.')
     } finally {
       setPagandoId(null)
     }
+  }
+
+  function limparFiltros() {
+    setStatus('')
+    setMetodoPagamento('')
+    setBusca('')
+    setInicio('')
+    setFim('')
   }
 
   return (
@@ -98,6 +121,41 @@ function PedidosPage() {
         ))}
       </div>
 
+      <form className="filter-panel" onSubmit={(event) => event.preventDefault()}>
+        <label>
+          Buscar
+          <input
+            onChange={(event) => setBusca(event.target.value)}
+            placeholder="Cliente, telefone ou produto"
+            type="search"
+            value={busca}
+          />
+        </label>
+
+        <label>
+          Pagamento
+          <select onChange={(event) => setMetodoPagamento(event.target.value)} value={metodoPagamento}>
+            <option value="">Todos</option>
+            <option value="FIADO">Fiado</option>
+            <option value="PIX">Pix</option>
+          </select>
+        </label>
+
+        <label>
+          Início
+          <input onChange={(event) => setInicio(event.target.value)} type="date" value={inicio} />
+        </label>
+
+        <label>
+          Fim
+          <input onChange={(event) => setFim(event.target.value)} type="date" value={fim} />
+        </label>
+
+        <button className="secondary-button" onClick={limparFiltros} type="button">
+          Limpar filtros
+        </button>
+      </form>
+
       {erro && <p className="error">{erro}</p>}
       {mensagem && <p className="success">{mensagem}</p>}
 
@@ -107,8 +165,9 @@ function PedidosPage() {
             <p className="muted">Carregando pedidos...</p>
           </div>
         ) : pedidos.length === 0 ? (
-          <div className="page-panel">
-            <p className="muted">Nenhum pedido encontrado.</p>
+          <div className="page-panel empty-state">
+            <h2>Nenhum pedido encontrado</h2>
+            <p className="muted">Ajuste os filtros ou limpe a busca para ver outros pedidos.</p>
           </div>
         ) : (
           pedidos.map((pedido) => (
@@ -116,6 +175,7 @@ function PedidosPage() {
               <div className="order-header">
                 <div>
                   <strong>{pedido.usuario.nome}</strong>
+                  <span>{pedido.usuario.telefone}</span>
                   <span>{formatarData(pedido.criadoEm)}</span>
                   <span className={`method-badge ${pedido.metodoPagamento === 'PIX' ? 'pix' : 'fiado'}`}>
                     {metodoLabel(pedido.metodoPagamento)}

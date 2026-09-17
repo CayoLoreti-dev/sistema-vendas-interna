@@ -45,9 +45,25 @@ function pedidoInclude() {
       select: {
         id: true,
         nome: true,
+        telefone: true,
       },
     },
   }
+}
+
+function parseDataFiltro(valor, fimDia = false) {
+  if (!valor) {
+    return null
+  }
+
+  const horario = fimDia ? '23:59:59.999' : '00:00:00.000'
+  const data = new Date(`${valor}T${horario}-03:00`)
+
+  if (Number.isNaN(data.getTime())) {
+    return null
+  }
+
+  return data
 }
 
 function validarMetodoPagamento(metodoPagamento) {
@@ -340,7 +356,7 @@ async function criarPedidoAdmin(req, res) {
 }
 
 async function listarPedidos(req, res) {
-  const { status } = req.query
+  const { status, metodoPagamento, usuarioId, busca, inicio, fim } = req.query
   const where = {}
 
   if (status) {
@@ -351,8 +367,68 @@ async function listarPedidos(req, res) {
     where.status = status
   }
 
+  if (metodoPagamento) {
+    if (!['FIADO', 'PIX'].includes(metodoPagamento)) {
+      return res.status(400).json({ mensagem: 'Forma de pagamento invalida' })
+    }
+
+    where.metodoPagamento = metodoPagamento
+  }
+
+  const dataInicio = parseDataFiltro(inicio)
+  const dataFim = parseDataFiltro(fim, true)
+
+  if ((inicio && !dataInicio) || (fim && !dataFim)) {
+    return res.status(400).json({ mensagem: 'Periodo invalido' })
+  }
+
+  if (dataInicio || dataFim) {
+    where.criadoEm = {
+      ...(dataInicio && { gte: dataInicio }),
+      ...(dataFim && { lte: dataFim }),
+    }
+  }
+
+  if (['ADMIN', 'VENDEDOR'].includes(req.usuario.papel) && usuarioId) {
+    where.usuarioId = usuarioId
+  }
+
   if (!['ADMIN', 'VENDEDOR'].includes(req.usuario.papel)) {
     where.usuarioId = req.usuario.id
+  }
+
+  const buscaNormalizada = String(busca || '').trim()
+
+  if (buscaNormalizada) {
+    where.OR = [
+      {
+        usuario: {
+          nome: {
+            contains: buscaNormalizada,
+            mode: 'insensitive',
+          },
+        },
+      },
+      {
+        usuario: {
+          telefone: {
+            contains: buscaNormalizada,
+          },
+        },
+      },
+      {
+        itens: {
+          some: {
+            produto: {
+              nome: {
+                contains: buscaNormalizada,
+                mode: 'insensitive',
+              },
+            },
+          },
+        },
+      },
+    ]
   }
 
   const pedidos = await prisma.pedido.findMany({
